@@ -353,9 +353,7 @@
             <div class="card shadow-sm border-0 mb-4 text-center">
                 <div class="card-body p-4">
                     <div class="mb-3">
-                        <div class="avatar-circle mx-auto bg-primary text-white d-flex align-items-center justify-content-center rounded-circle fs-2 shadow-sm" style="width: 70px; height: 70px;">
-                            <i class="bi bi-person"></i>
-                        </div>
+                        <img src="{{ auth()->user()->avatar_url }}" alt="Profile" class="rounded-circle shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
                     </div>
                     <h6 class="fw-bold text-dark mb-0">{{ auth()->user()->name }}</h6>
                     <small class="text-muted d-block mb-2">{{ auth()->user()->email }}</small>

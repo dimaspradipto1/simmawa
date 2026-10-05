@@ -18,6 +18,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role');
+            $table->string('nim')->nullable();
+            $table->string('fakultas')->nullable();
+            $table->string('program_studi')->nullable();
+            $table->string('jabatan')->nullable();
+            $table->string('photo_profile')->nullable();
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();

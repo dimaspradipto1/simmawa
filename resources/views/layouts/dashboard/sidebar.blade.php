@@ -97,7 +97,7 @@
       </li>
     @endif
 
-    <!-- 5. Manajemen Pengguna (Superadmin & Admin BKAK) -->
+    <!-- 5. Pengaturan (Superadmin & Admin BKAK) -->
     @if(in_array(auth()->user()->role, ['superadmin', 'adminbkak']))
       <li class="nav-heading">Pengaturan</li>
 
@@ -105,6 +105,13 @@
         <a class="nav-link {{ request()->routeIs('users.*') ? '' : 'collapsed' }}" href="{{ route('users.index') }}">
           <i class="bi bi-people"></i>
           <span>Manajemen Pengguna</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('logo-prodi.*') ? '' : 'collapsed' }}" href="{{ route('logo-prodi.index') }}">
+          <i class="bi bi-patch-check"></i>
+          <span>Logo Program Studi</span>
         </a>
       </li>
     @endif

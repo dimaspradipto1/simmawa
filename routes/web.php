@@ -10,6 +10,7 @@ use App\Http\Controllers\PrestasiMandiriController;
 use App\Http\Controllers\RekapitulasiController;
 use App\Http\Controllers\RekognisiController;
 use App\Http\Controllers\SertifikasiController;
+use App\Http\Controllers\LogoProdiController;
 use App\Http\Controllers\TemplateLpjController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,9 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
 
     // Institusi Resource Routes
     Route::resource('institusi', InstitusiController::class);
+
+    // Logo Prodi Resource Routes
+    Route::resource('logo-prodi', LogoProdiController::class);
 
     // Template LPJ Resource Routes
     Route::get('template-lpj/{template_lpj}/download', [TemplateLpjController::class, 'download'])->name('template-lpj.download');

@@ -20,7 +20,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Form Tambah User Baru</h5>
 
-                    <form action="{{ route('users.store') }}" method="POST" class="row g-3">
+                    <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" class="row g-3">
                         @csrf
 
                         <div class="col-md-6">
@@ -72,6 +72,48 @@
                                 <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Non-Aktif</option>
                             </select>
                             @error('is_active')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12"><hr class="my-2 text-muted"></div>
+
+                        <div class="col-md-6">
+                            <label for="nim" class="form-label">NIM <small class="text-muted">(Opsional)</small></label>
+                            <input type="text" class="form-control @error('nim') is-invalid @enderror" id="nim" name="nim" value="{{ old('nim') }}" placeholder="Nomor Induk Mahasiswa">
+                            @error('nim')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="jabatan" class="form-label">Jabatan <small class="text-muted">(Opsional)</small></label>
+                            <input type="text" class="form-control @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan" value="{{ old('jabatan') }}" placeholder="Contoh: Dosen Pembimbing">
+                            @error('jabatan')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="fakultas" class="form-label">Fakultas <small class="text-muted">(Opsional)</small></label>
+                            <input type="text" class="form-control @error('fakultas') is-invalid @enderror" id="fakultas" name="fakultas" value="{{ old('fakultas') }}" placeholder="Contoh: Fakultas Ilmu Komputer">
+                            @error('fakultas')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="program_studi" class="form-label">Program Studi <small class="text-muted">(Opsional)</small></label>
+                            <input type="text" class="form-control @error('program_studi') is-invalid @enderror" id="program_studi" name="program_studi" value="{{ old('program_studi') }}" placeholder="Contoh: Teknik Informatika">
+                            @error('program_studi')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12">
+                            <label for="photo_profile" class="form-label">Foto Profil <small class="text-muted">(Opsional - JPG, PNG, WEBP, Maks. 2MB)</small></label>
+                            <input type="file" class="form-control @error('photo_profile') is-invalid @enderror" id="photo_profile" name="photo_profile" accept="image/*">
+                            @error('photo_profile')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

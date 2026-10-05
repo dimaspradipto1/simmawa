@@ -21,6 +21,15 @@ class UserDataTable extends DataTable
     {
         return (new EloquentDataTable($query))
             ->addIndexColumn()
+            ->editColumn('name', function ($user) {
+                return '<div class="d-flex align-items-center gap-2">
+                    <img src="' . e($user->avatar_url) . '" class="rounded-circle shadow-sm" style="width: 32px; height: 32px; object-fit: cover; flex-shrink: 0; border: 1px solid #e2e8f0;">
+                    <div>
+                        <div class="fw-semibold text-dark">' . e($user->name) . '</div>
+                        ' . ($user->nim ? '<small class="text-muted">NIM: ' . e($user->nim) . '</small>' : '') . '
+                    </div>
+                </div>';
+            })
             ->editColumn('role', function ($user) {
                 $badgeClasses = [
                     'superadmin'       => 'bg-danger',
@@ -62,7 +71,7 @@ class UserDataTable extends DataTable
 
                 return '<div class="action-btn-group" role="group">' . $btnEdit . $btnDelete . '</div>';
             })
-            ->rawColumns(['role', 'is_active', 'action'])
+            ->rawColumns(['name', 'role', 'is_active', 'action'])
             ->setRowId('id');
     }
 

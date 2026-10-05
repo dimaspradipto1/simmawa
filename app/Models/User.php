@@ -23,8 +23,26 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'is_active'
+        'nim',
+        'fakultas',
+        'program_studi',
+        'organisasi',
+        'jabatan',
+        'photo_profile',
+        'is_active',
     ];
+
+    /**
+     * Get the URL for the user's profile photo or fallback to UI Avatars.
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->photo_profile && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->photo_profile)) {
+            return asset('storage/' . $this->photo_profile);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=cbd5e1&color=334155';
+    }
 
     /**
      * The attributes that should be hidden for serialization.
