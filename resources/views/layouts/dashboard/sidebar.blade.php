@@ -111,7 +111,14 @@
       <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('logo-prodi.*') ? '' : 'collapsed' }}" href="{{ route('logo-prodi.index') }}">
           <i class="bi bi-patch-check"></i>
-          <span>Logo Ormawa & Prodi</span>
+          <span>Logo Ormawa</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('kta-setting.*') ? '' : 'collapsed' }}" href="{{ route('kta-setting.index') }}">
+          <i class="bi bi-card-heading"></i>
+          <span>Pengaturan KTA / KTM</span>
         </a>
       </li>
     @endif

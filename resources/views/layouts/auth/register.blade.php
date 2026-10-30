@@ -420,12 +420,17 @@
             border: none;
             color: white;
             font-weight: 600;
-            padding: 0.75rem 1rem;
+            padding: 0 1.25rem;
             border-radius: 11px;
-            font-size: 0.9rem;
+            font-size: 0.92rem;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(4, 107, 38, 0.2);
             text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            white-space: nowrap;
             width: 100%;
         }
 
@@ -439,12 +444,18 @@
         .btn-prev-step {
             border-radius: 11px;
             font-weight: 600;
-            font-size: 0.88rem;
-            padding: 0.72rem 1.1rem;
+            font-size: 0.9rem;
+            padding: 0 1.25rem;
             color: #475569;
             border: 1.5px solid #cbd5e1;
             background: #ffffff;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .btn-prev-step:hover {
@@ -944,28 +955,24 @@
                                 </div>
                             </div>
 
-                            <!-- Jabatan di Organisasi -->
+                            <!-- Jabatan di Organisasi (Dinamis per Masing-masing Organisasi) -->
                             <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <label for="jabatan" class="form-label mb-0">Jabatan di Organisasi</label>
-                                    <span id="jabatan-context-hint" class="small text-muted" style="font-size: 0.75rem;">Sesuai SK Pengurus 2026-2027</span>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0 fw-semibold text-dark">
+                                        <i class="bi bi-briefcase me-1 text-success"></i>Jabatan di Organisasi
+                                    </label>
+                                    <span id="jabatan-context-hint" class="small text-muted" style="font-size: 0.74rem;">
+                                        <i class="bi bi-shield-check me-1 text-success"></i>Sesuai SK Pengurus 2026-2027
+                                    </span>
                                 </div>
-                                <div class="input-wrapper">
-                                    <span class="input-icon"><i class="bi bi-briefcase"></i></span>
-                                    <select name="jabatan" id="jabatan" class="form-input">
-                                        <option value="">-- Pilih Jabatan / Posisi --</option>
-                                        @foreach($jabatan as $groupLabel => $items)
-                                            <optgroup label="{{ $groupLabel }}">
-                                                @foreach($items as $val => $text)
-                                                    <option value="{{ $val }}" {{ old('jabatan') == $val ? 'selected' : '' }}>{{ $text }}</option>
-                                                @endforeach
-                                            </optgroup>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div id="wrapper-jabatan-custom" class="mt-2" style="display: {{ old('jabatan') === 'Lainnya' || old('jabatan_custom') ? 'block' : 'none' }};">
-                                    <input type="text" name="jabatan_custom" id="jabatan_custom" class="form-input" style="font-size: 0.85rem;" placeholder="Ketik nama jabatan / departemen spesifik..." value="{{ old('jabatan_custom') }}">
-                                    <span class="form-text small text-muted" style="font-size: 0.74rem;">Contoh: <em>Kepala Departemen Advokasi dan Kajian Hukum</em> atau <em>PIC Publikasi dan Dokumentasi</em></span>
+
+                                <!-- Container dinamis pilihan jabatan untuk tiap organisasi terpilih -->
+                                <div id="organisasi-jabatan-list" class="d-flex flex-column gap-2 mb-2"></div>
+
+                                <!-- Placeholder jika belum ada organisasi yang dipilih -->
+                                <div id="no-org-selected-hint" class="p-3 text-center rounded-3 border bg-light text-muted small">
+                                    <i class="bi bi-info-circle text-primary me-1"></i>
+                                    Pilih <strong>Organisasi / Ormawa UIS</strong> di atas untuk menentukan jabatan Anda pada masing-masing organisasi.
                                 </div>
                             </div>
 
@@ -1299,129 +1306,187 @@
         }
 
         // ==========================================
-        // Dynamic Jabatan Options Logic (SK 2026-2027)
+        // Dynamic Jabatan per Masing-masing Organisasi (SK 2026-2027)
         // ==========================================
         const JABATAN_BY_ORG = @json($jabatan_by_org ?? []);
         const JABATAN_GENERAL = @json($jabatan ?? []);
-        const jabatanSelect = document.getElementById('jabatan');
-        const jabatanCustomWrapper = document.getElementById('wrapper-jabatan-custom');
-        const jabatanCustomInput = document.getElementById('jabatan_custom');
-        const jabatanHint = document.getElementById('jabatan-context-hint');
-        const initialSelectedJabatan = "{{ old('jabatan') }}";
+        const jabatanContainer = document.getElementById('organisasi-jabatan-list');
+        const noOrgHint = document.getElementById('no-org-selected-hint');
+        const oldJabatanOrg = @json(old('jabatan_org', []));
+        const oldJabatanCustom = @json(old('jabatan_custom', []));
 
-        function updateJabatanOptions() {
-            if (!jabatanSelect) return;
+        // Menyimpan nilai jabatan yang dipilih user per organisasi
+        const selectedJabatanState = { ...oldJabatanOrg };
+        const selectedCustomState = { ...oldJabatanCustom };
+
+        function updateJabatanPerOrgList() {
+            if (!jabatanContainer) return;
 
             const checkedBoxes = Array.from(document.querySelectorAll('.org-item-checkbox:checked'));
-            const checkedValues = checkedBoxes.map(cb => cb.value);
 
-            let matchingGroups = {};
-            let hasOrgMatch = false;
+            if (checkedBoxes.length === 0) {
+                jabatanContainer.innerHTML = '';
+                if (noOrgHint) noOrgHint.style.display = 'block';
+                return;
+            }
 
-            checkedValues.forEach(orgKey => {
-                if (JABATAN_BY_ORG[orgKey]) {
-                    hasOrgMatch = true;
-                    matchingGroups[orgKey] = JABATAN_BY_ORG[orgKey];
-                }
+            if (noOrgHint) noOrgHint.style.display = 'none';
+
+            // Simpan nilai saat ini dari DOM sebelum render ulang
+            document.querySelectorAll('.select-jabatan-per-org').forEach(sel => {
+                const org = sel.getAttribute('data-org');
+                if (org) selectedJabatanState[org] = sel.value;
+            });
+            document.querySelectorAll('.custom-input-per-org').forEach(inp => {
+                const org = inp.getAttribute('data-org');
+                if (org) selectedCustomState[org] = inp.value;
             });
 
-            const currentVal = jabatanSelect.value || initialSelectedJabatan;
-            jabatanSelect.innerHTML = '<option value="">-- Pilih Jabatan / Posisi --</option>';
+            // Kosongkan dan render ulang kartu per organisasi
+            jabatanContainer.innerHTML = '';
 
-            if (hasOrgMatch) {
-                if (jabatanHint) {
-                    jabatanHint.innerHTML = '<span class="text-success fw-semibold"><i class="bi bi-shield-check me-1"></i>Sesuai SK Pengurus 2026-2027</span>';
-                }
+            checkedBoxes.forEach(cb => {
+                const orgKey = cb.value;
+                const orgLabel = cb.getAttribute('data-label') || orgKey;
+                const shortLabel = orgLabel.split('(')[0].replace(' - ', ' ').trim();
+                const currentVal = selectedJabatanState[orgKey] || '';
+                const currentCustom = selectedCustomState[orgKey] || '';
 
-                for (const [orgName, groups] of Object.entries(matchingGroups)) {
-                    const shortOrgName = orgName.split(' - ')[0].replace('Universitas Ibnu Sina', 'UIS').trim();
-                    for (const [groupName, items] of Object.entries(groups)) {
+                const card = document.createElement('div');
+                card.className = 'p-3 rounded-3 border bg-white shadow-sm';
+                card.style.borderColor = '#e2e8f0';
+
+                // Header Card
+                const header = document.createElement('div');
+                header.className = 'd-flex align-items-center justify-content-between mb-2 pb-1 border-bottom';
+                header.innerHTML = `
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold" style="font-size: 0.72rem;">
+                            <i class="bi bi-diagram-3 me-1"></i>${shortLabel}
+                        </span>
+                        <span class="small fw-bold text-dark text-truncate" style="max-width: 250px;">${orgKey}</span>
+                    </div>
+                    <span class="badge bg-light text-muted border small" style="font-size: 0.68rem;">Pilih Jabatan</span>
+                `;
+                card.appendChild(header);
+
+                // Select Box
+                const inputWrapper = document.createElement('div');
+                inputWrapper.className = 'input-wrapper';
+                
+                const select = document.createElement('select');
+                select.name = `jabatan_org[${orgKey}]`;
+                select.className = 'form-input select-jabatan-per-org';
+                select.setAttribute('data-org', orgKey);
+                select.style.fontSize = '0.85rem';
+                select.style.paddingLeft = '2.2rem';
+
+                select.innerHTML = `<option value="">-- Pilih Jabatan di ${shortLabel} --</option>`;
+
+                // Isi options: dari JABATAN_BY_ORG jika ada, fallback JABATAN_GENERAL
+                const orgGroups = JABATAN_BY_ORG[orgKey];
+                if (orgGroups) {
+                    for (const [groupName, items] of Object.entries(orgGroups)) {
                         const optgroup = document.createElement('optgroup');
-                        optgroup.label = `${shortOrgName} • ${groupName}`;
+                        optgroup.label = groupName;
                         items.forEach(item => {
                             const opt = document.createElement('option');
                             opt.value = item;
                             opt.textContent = item;
-                            if (item === currentVal) {
-                                opt.selected = true;
-                            }
+                            if (item === currentVal) opt.selected = true;
                             optgroup.appendChild(opt);
                         });
-                        jabatanSelect.appendChild(optgroup);
+                        select.appendChild(optgroup);
                     }
-                }
-            } else {
-                if (jabatanHint) {
-                    jabatanHint.textContent = 'Pilihan Jabatan Standar';
-                }
-                for (const [groupName, items] of Object.entries(JABATAN_GENERAL)) {
-                    const optgroup = document.createElement('optgroup');
-                    optgroup.label = groupName;
-                    for (const [val, label] of Object.entries(items)) {
-                        const opt = document.createElement('option');
-                        opt.value = val;
-                        opt.textContent = label;
-                        if (val === currentVal) {
-                            opt.selected = true;
+                } else {
+                    for (const [groupName, items] of Object.entries(JABATAN_GENERAL)) {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = groupName;
+                        for (const [val, label] of Object.entries(items)) {
+                            const opt = document.createElement('option');
+                            opt.value = val;
+                            opt.textContent = label;
+                            if (val === currentVal) opt.selected = true;
+                            optgroup.appendChild(opt);
                         }
-                        optgroup.appendChild(opt);
+                        select.appendChild(optgroup);
                     }
-                    jabatanSelect.appendChild(optgroup);
                 }
-            }
 
-            // Selalu tambahkan opsi Lainnya jika belum ada di dalam select
-            const hasLainnya = Array.from(jabatanSelect.options).some(o => o.value === 'Lainnya');
-            if (!hasLainnya) {
-                const optLainnya = document.createElement('option');
-                optLainnya.value = 'Lainnya';
-                optLainnya.textContent = 'Lainnya (Ketik Manual)...';
-                if (currentVal === 'Lainnya') {
-                    optLainnya.selected = true;
+                // Tambahkan opsi Lainnya
+                if (!Array.from(select.options).some(o => o.value === 'Lainnya')) {
+                    const optLainnya = document.createElement('option');
+                    optLainnya.value = 'Lainnya';
+                    optLainnya.textContent = 'Lainnya (Ketik Manual)...';
+                    if (currentVal === 'Lainnya') optLainnya.selected = true;
+                    select.appendChild(optLainnya);
                 }
-                jabatanSelect.appendChild(optLainnya);
-            }
 
-            // Jika nilai yang tersimpan sebelumnya adalah custom text yang bukan dari daftar, pertahankan
-            if (currentVal && currentVal !== 'Lainnya' && !Array.from(jabatanSelect.options).some(o => o.value === currentVal)) {
-                const customOpt = document.createElement('option');
-                customOpt.value = currentVal;
-                customOpt.textContent = currentVal;
-                customOpt.selected = true;
-                jabatanSelect.insertBefore(customOpt, jabatanSelect.lastElementChild);
-            }
-
-            checkCustomJabatanState();
-        }
-
-        function checkCustomJabatanState() {
-            if (!jabatanSelect || !jabatanCustomWrapper) return;
-            if (jabatanSelect.value === 'Lainnya') {
-                jabatanCustomWrapper.style.display = 'block';
-                if (jabatanCustomInput && !jabatanCustomInput.value) {
-                    jabatanCustomInput.focus();
+                // Pertahankan jika currentVal custom
+                if (currentVal && currentVal !== 'Lainnya' && !Array.from(select.options).some(o => o.value === currentVal)) {
+                    const customOpt = document.createElement('option');
+                    customOpt.value = currentVal;
+                    customOpt.textContent = currentVal;
+                    customOpt.selected = true;
+                    select.insertBefore(customOpt, select.lastElementChild);
                 }
-            } else {
-                jabatanCustomWrapper.style.display = 'none';
-            }
-        }
 
-        if (jabatanSelect) {
-            jabatanSelect.addEventListener('change', checkCustomJabatanState);
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'input-icon';
+                iconSpan.innerHTML = '<i class="bi bi-briefcase"></i>';
+
+                inputWrapper.appendChild(iconSpan);
+                inputWrapper.appendChild(select);
+                card.appendChild(inputWrapper);
+
+                // Custom input wrapper jika pilih 'Lainnya'
+                const customWrapper = document.createElement('div');
+                customWrapper.className = 'mt-2 custom-wrapper-per-org';
+                customWrapper.style.display = (select.value === 'Lainnya' || currentCustom) ? 'block' : 'none';
+
+                const customInput = document.createElement('input');
+                customInput.type = 'text';
+                customInput.name = `jabatan_custom[${orgKey}]`;
+                customInput.className = 'form-input custom-input-per-org';
+                customInput.setAttribute('data-org', orgKey);
+                customInput.placeholder = `Ketik jabatan spesifik di ${shortLabel}...`;
+                customInput.value = currentCustom;
+                customInput.style.fontSize = '0.82rem';
+
+                customWrapper.appendChild(customInput);
+                card.appendChild(customWrapper);
+
+                // Event listener on change
+                select.addEventListener('change', function() {
+                    selectedJabatanState[orgKey] = this.value;
+                    if (this.value === 'Lainnya') {
+                        customWrapper.style.display = 'block';
+                        customInput.focus();
+                    } else {
+                        customWrapper.style.display = 'none';
+                    }
+                });
+
+                customInput.addEventListener('input', function() {
+                    selectedCustomState[orgKey] = this.value;
+                });
+
+                jabatanContainer.appendChild(card);
+            });
         }
 
         // Jalankan update jabatan saat ada perubahan checkbox organisasi
         orgCheckboxes.forEach(cb => {
-            cb.addEventListener('change', updateJabatanOptions);
+            cb.addEventListener('change', updateJabatanPerOrgList);
         });
         if (btnResetOrg) {
             btnResetOrg.addEventListener('click', function() {
-                setTimeout(updateJabatanOptions, 10);
+                setTimeout(updateJabatanPerOrgList, 10);
             });
         }
 
         // Inisialisasi awal
-        updateJabatanOptions();
+        updateJabatanPerOrgList();
 
         // If backend returned errors on Step 2 fields, auto switch to Step 2
         @if ($errors->has('nim') || $errors->has('fakultas') || $errors->has('program_studi') || $errors->has('organisasi') || $errors->has('jabatan'))

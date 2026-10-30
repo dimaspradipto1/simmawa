@@ -665,8 +665,9 @@ class AuthController extends Controller
             'fakultas'      => 'nullable|string|max:255',
             'program_studi' => 'nullable|string|max:255',
             'organisasi'    => 'nullable',
-            'jabatan'       => 'nullable|string|max:255',
-            'jabatan_custom'=> 'nullable|string|max:255',
+            'jabatan'       => 'nullable',
+            'jabatan_org'   => 'nullable|array',
+            'jabatan_custom'=> 'nullable',
         ], [
             'name.required'      => 'Nama lengkap wajib diisi.',
             'email.required'     => 'Alamat email wajib diisi.',
@@ -686,11 +687,8 @@ class AuthController extends Controller
             }
         }
 
-        // Tentukan jabatan: jika memilih 'Lainnya' dan mengisi jabatan_custom, gunakan custom
-        $jabatanVal = $request->filled('jabatan') ? trim($request->jabatan) : null;
-        if (($jabatanVal === 'Lainnya' || empty($jabatanVal)) && $request->filled('jabatan_custom')) {
-            $jabatanVal = trim($request->jabatan_custom);
-        }
+        // Tentukan jabatan per masing-masing organisasi
+        $jabatanVal = self::formatJabatanPerOrg($request);
 
         $user = User::create([
             'name'          => trim($request->name),
@@ -786,16 +784,79 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         $logoProdi = \App\Models\LogoProdi::getForUser($user);
+        $ktaCards = \App\Models\LogoProdi::getKtaCardsForUser($user);
+        $ktaSetting = \App\Models\KtaSetting::getSetting();
         $master = self::getMasterAcademicAndOrgData();
         return view('pages.users.profile', [
             'user'           => $user,
             'logoProdi'      => $logoProdi,
+            'ktaCards'       => $ktaCards,
+            'ktaSetting'     => $ktaSetting,
             'fakultas'       => $master['fakultas'],
             'prodis'         => $master['prodis'],
             'organisasi'     => $master['organisasi'],
             'jabatan'        => $master['jabatan'],
             'jabatan_by_org' => $master['jabatan_by_org'],
+            'userJabatanMap' => $user->jabatan_map,
         ]);
+    }
+
+    /**
+     * Memproses mapping jabatan per masing-masing organisasi menjadi teks terstruktur.
+     */
+    protected static function formatJabatanPerOrg(Request $request): ?string
+    {
+        $jabatanOrg = $request->input('jabatan_org');
+        $jabatanCustom = $request->input('jabatan_custom');
+
+        // Jika dikirim dalam bentuk array jabatan per organisasi (jabatan_org[OrgName])
+        if (is_array($jabatanOrg) && !empty($jabatanOrg)) {
+            $formattedParts = [];
+
+            // Ambil daftar organisasi yang dipilih
+            $selectedOrgs = [];
+            if ($request->has('organisasi')) {
+                $selectedOrgs = is_array($request->organisasi)
+                    ? $request->organisasi
+                    : array_map('trim', explode(',', $request->organisasi));
+            }
+
+            foreach ($selectedOrgs as $org) {
+                if (empty($org)) continue;
+                $pos = $jabatanOrg[$org] ?? null;
+
+                // Jika pos 'Lainnya' dan ada custom jabatan untuk org tersebut
+                if (($pos === 'Lainnya' || empty($pos)) && is_array($jabatanCustom) && !empty($jabatanCustom[$org])) {
+                    $pos = trim($jabatanCustom[$org]);
+                }
+
+                if (!empty($pos) && $pos !== 'Lainnya') {
+                    // Dapatkan singkatan organisasi yang lebih ringkas
+                    $shortOrg = trim(explode(' - ', $org)[0]);
+                    $shortOrg = str_replace('Universitas Ibnu Sina', 'UIS', $shortOrg);
+
+                    if (count($selectedOrgs) > 1) {
+                        $formattedParts[] = "{$pos} ({$shortOrg})";
+                    } else {
+                        $formattedParts[] = $pos;
+                    }
+                }
+            }
+
+            if (!empty($formattedParts)) {
+                return implode(', ', $formattedParts);
+            }
+        }
+
+        // Fallback untuk single jabatan input biasa
+        $singleJabatan = $request->filled('jabatan') ? trim($request->jabatan) : null;
+        if (($singleJabatan === 'Lainnya' || empty($singleJabatan)) && $request->filled('jabatan_custom')) {
+            if (is_string($request->jabatan_custom)) {
+                $singleJabatan = trim($request->jabatan_custom);
+            }
+        }
+
+        return !empty($singleJabatan) ? $singleJabatan : null;
     }
 
     public function updateProfile(Request $request)
@@ -810,8 +871,9 @@ class AuthController extends Controller
             'fakultas'       => ['nullable', 'string', 'max:255'],
             'program_studi'  => ['nullable', 'string', 'max:255'],
             'organisasi'     => ['nullable'],
-            'jabatan'        => ['nullable', 'string', 'max:255'],
-            'jabatan_custom' => ['nullable', 'string', 'max:255'],
+            'jabatan'        => ['nullable'],
+            'jabatan_org'    => ['nullable', 'array'],
+            'jabatan_custom' => ['nullable'],
             'photo_profile'  => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'name.required'         => 'Nama lengkap wajib diisi.',
@@ -833,11 +895,9 @@ class AuthController extends Controller
             $validated['organisasi'] = null;
         }
 
-        // Tentukan jabatan
-        if ($request->filled('jabatan_custom') && ($request->input('jabatan') === 'Lainnya' || empty($request->input('jabatan')))) {
-            $validated['jabatan'] = trim($request->input('jabatan_custom'));
-        }
-        unset($validated['jabatan_custom']);
+        // Tentukan jabatan per masing-masing organisasi
+        $validated['jabatan'] = self::formatJabatanPerOrg($request);
+        unset($validated['jabatan_org'], $validated['jabatan_custom']);
 
         if ($request->boolean('remove_photo')) {
             if ($user->photo_profile && Storage::disk('public')->exists($user->photo_profile)) {

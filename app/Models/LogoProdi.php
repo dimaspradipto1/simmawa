@@ -59,6 +59,123 @@ class LogoProdi extends Model
     }
 
     /**
+     * Menghasilkan daftar seluruh Kartu Tanda Anggota (KTA / KTM) untuk masing-masing organisasi user.
+     */
+    public static function getKtaCardsForUser(?User $user): array
+    {
+        if (!$user) {
+            return [];
+        }
+
+        $activeLogos = self::where('is_active', true)->get();
+        $userJabatanMap = $user->jabatan_map ?? [];
+        $cards = [];
+
+        // 1. Ambil seluruh organisasi yang diikuti user
+        $userOrgs = [];
+        if (!empty($user->organisasi)) {
+            $userOrgs = is_array($user->organisasi)
+                ? $user->organisasi
+                : array_map('trim', explode(',', (string)$user->organisasi));
+        }
+
+        foreach ($userOrgs as $index => $orgName) {
+            if (empty($orgName)) continue;
+            $cleanOrg = strtolower($orgName);
+
+            // Cari logo di database yang cocok
+            $matchedLogo = $activeLogos->first(function ($item) use ($cleanOrg) {
+                $itemNama = strtolower(trim((string)$item->nama_organisasi));
+                $itemSingkatan = strtolower(trim((string)$item->singkatan));
+
+                if ($itemSingkatan && (str_contains($cleanOrg, $itemSingkatan) || str_contains($itemSingkatan, $cleanOrg))) {
+                    return true;
+                }
+                if ($itemNama && (str_contains($cleanOrg, $itemNama) || str_contains($itemNama, $cleanOrg))) {
+                    return true;
+                }
+                return false;
+            });
+
+            // Tentukan singkatan & judul
+            $singkatan = $matchedLogo->singkatan ?? trim(explode(' - ', $orgName)[0]);
+            $singkatan = str_replace('Universitas Ibnu Sina', 'UIS', $singkatan);
+            
+            $namaOrg = $matchedLogo->nama_organisasi ?? $orgName;
+            
+            // Jabatan spesifik untuk organisasi ini
+            $posisi = $userJabatanMap[$orgName] ?? null;
+            if (!$posisi) {
+                // Coba cocokkan dengan key singkatan atau variasi nama
+                $cleanSingkatan = strtolower($singkatan);
+                foreach ($userJabatanMap as $mapKey => $mapPos) {
+                    $cleanKey = strtolower(trim($mapKey));
+                    // 1. Cek substring matching langsung
+                    if (str_contains($cleanOrg, $cleanKey) || str_contains($cleanKey, $cleanOrg) ||
+                        str_contains($cleanSingkatan, $cleanKey) || str_contains($cleanKey, $cleanSingkatan)) {
+                        $posisi = $mapPos;
+                        break;
+                    }
+                    // 2. Cek token utama (misal: BEM, DPM, HMTI, dsb.)
+                    $firstTokenKey = explode(' ', $cleanKey)[0] ?? '';
+                    $firstTokenOrg = explode(' ', $cleanOrg)[0] ?? '';
+                    if (!empty($firstTokenKey) && strlen($firstTokenKey) >= 3 && ($firstTokenKey === $firstTokenOrg || str_contains($cleanOrg, $firstTokenKey))) {
+                        $posisi = $mapPos;
+                        break;
+                    }
+                }
+            }
+            if (!$posisi) {
+                $posisi = count($userOrgs) === 1 ? ($user->jabatan ?? 'Anggota') : 'Anggota';
+            }
+
+            // Tentukan kategori / badge
+            $badge = 'Ormawa';
+            if (str_contains($orgName, 'BEM') || str_contains($orgName, 'DPM')) {
+                $badge = 'Lembaga Kampus';
+            } elseif (str_contains($orgName, 'HMTI') || str_contains($orgName, 'HIMASI') || str_contains($orgName, 'HIMA') || str_contains($orgName, 'HMM') || str_contains($orgName, 'HMA') || str_contains($orgName, 'HM')) {
+                $badge = 'Himpunan (HIMA)';
+            } elseif (str_contains($orgName, 'UKM')) {
+                $badge = 'UKM';
+            }
+
+            $cards[] = [
+                'id'           => 'kta-' . $index,
+                'tab_title'    => $singkatan,
+                'badge'        => $badge,
+                'singkatan'    => $singkatan,
+                'nama_org'     => $namaOrg,
+                'banner_sub'   => strtoupper($namaOrg),
+                'jabatan'      => $posisi,
+                'logo_url'     => $matchedLogo ? $matchedLogo->logo_url : asset('assets/img/logo_uis.png'),
+                'is_bem'       => str_contains($cleanOrg, 'bem'),
+                'qr_data'      => urlencode("VERIFIKASI-KTA-{$singkatan}|" . ($user->nim ?? $user->id) . "|{$user->name}"),
+                'qr_text'      => "untuk verifikasi keanggotaan {$singkatan} Universitas Ibnu Sina",
+            ];
+        }
+
+        // 2. Jika user tidak punya organisasi, atau ingin disediakan KTM prodi jika ada
+        if (empty($cards)) {
+            $logoProdi = self::getForProdi($user->program_studi);
+            $cards[] = [
+                'id'           => 'kta-default',
+                'tab_title'    => 'KTM Mahasiswa',
+                'badge'        => 'Mahasiswa UIS',
+                'singkatan'    => $logoProdi->singkatan ?? 'UIS',
+                'nama_org'     => $logoProdi->nama_organisasi ?? 'UNIVERSITAS IBNU SINA',
+                'banner_sub'   => strtoupper($logoProdi->nama_organisasi ?? 'UNIVERSITAS IBNU SINA'),
+                'jabatan'      => $user->jabatan ?: 'Mahasiswa Aktif',
+                'logo_url'     => $logoProdi ? $logoProdi->logo_url : asset('assets/img/logo_uis.png'),
+                'is_bem'       => false,
+                'qr_data'      => urlencode("VERIFIKASI-KTM-UIS|" . ($user->nim ?? $user->id) . "|{$user->name}"),
+                'qr_text'      => "untuk verifikasi status kemahasiswaan Universitas Ibnu Sina",
+            ];
+        }
+
+        return $cards;
+    }
+
+    /**
      * Mencari logo yang cocok untuk user (berdasarkan organisasi atau program studi).
      */
     public static function getForUser(?User $user): ?self

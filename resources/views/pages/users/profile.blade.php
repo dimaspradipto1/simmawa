@@ -284,30 +284,24 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <label for="jabatan" class="form-label mb-0">Jabatan di Organisasi</label>
-                                            <span id="prof-jabatan-context-hint" class="small text-muted" style="font-size: 0.75rem;">Sesuai SK Pengurus 2026-2027</span>
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <label class="form-label mb-0 fw-semibold text-dark">
+                                                <i class="bi bi-briefcase me-1 text-primary"></i>Jabatan di Organisasi
+                                            </label>
+                                            <span id="prof-jabatan-context-hint" class="small text-muted" style="font-size: 0.74rem;">
+                                                <i class="bi bi-shield-check me-1 text-success"></i>Sesuai SK Pengurus 2026-2027
+                                            </span>
                                         </div>
-                                        <select class="form-select @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
-                                            <option value="">-- Pilih Jabatan / Posisi --</option>
-                                            @if(isset($jabatan))
-                                                @foreach($jabatan as $groupLabel => $items)
-                                                    <optgroup label="{{ $groupLabel }}">
-                                                        @foreach($items as $val => $text)
-                                                            <option value="{{ $val }}" {{ old('jabatan', $user->jabatan) == $val ? 'selected' : '' }}>{{ $text }}</option>
-                                                        @endforeach
-                                                    </optgroup>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                        <div id="prof-wrapper-jabatan-custom" class="mt-2" style="display: {{ old('jabatan', $user->jabatan) === 'Lainnya' ? 'block' : 'none' }};">
-                                            <input type="text" name="jabatan_custom" id="prof_jabatan_custom" class="form-control form-control-sm" placeholder="Ketik jabatan / departemen spesifik..." value="{{ old('jabatan_custom') }}">
-                                            <span class="form-text small text-muted" style="font-size: 0.74rem;">Contoh: <em>Kepala Departemen Advokasi dan Kajian Hukum</em> atau <em>Pimpinan Redaksi</em></span>
+
+                                        <!-- Container dinamis pilihan jabatan untuk tiap organisasi terpilih -->
+                                        <div id="prof-organisasi-jabatan-list" class="d-flex flex-column gap-2 mb-2"></div>
+
+                                        <!-- Placeholder jika belum ada organisasi yang dipilih -->
+                                        <div id="prof-no-org-selected-hint" class="p-3 text-center rounded-3 border bg-light text-muted small">
+                                            <i class="bi bi-info-circle text-primary me-1"></i>
+                                            Pilih <strong>Organisasi / Ormawa UIS</strong> di atas untuk menentukan jabatan Anda pada masing-masing organisasi.
                                         </div>
-                                        @error('jabatan')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
                                     </div>
 
                                     <div class="col-12 text-end mt-4">
@@ -363,12 +357,12 @@
                                 </form>
                             </div>
 
-                            <!-- KTM / KTA Tab -->
+                            <!-- KTM / KTA Tab (Masing-masing Kartu Organisasi & Tab Nav) -->
                             <div class="tab-pane fade" id="profile-ktm" role="tabpanel">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom gap-2">
                                     <div>
                                         <h5 class="card-title p-0 m-0">Kartu Tanda Anggota (KTM / KTA)</h5>
-                                        <small class="text-muted">Data pada kartu diperbarui otomatis sesuai profil Anda.</small>
+                                        <small class="text-muted">Setiap organisasi yang Anda ikuti memiliki Kartu Anggota resmi tersendiri.</small>
                                     </div>
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-outline-primary btn-sm" onclick="printKtaCard()">
@@ -380,121 +374,130 @@
                                     </div>
                                 </div>
 
-                                <!-- Card Preview Wrapper -->
-                                <div class="d-flex justify-content-center p-2 p-md-3 bg-light rounded-3 border">
-                                    <div id="kta-card-print-area" class="kta-card-container">
-                                        <div id="kta-card" class="kta-card-body">
-                                            <!-- Top Header: Logo Prodi / BEM Emblem & Title -->
-                                            <div class="kta-bem-header">
-                                                @if(isset($logoProdi) && $logoProdi)
-                                                    <img src="{{ $logoProdi->logo_url }}" alt="{{ $logoProdi->nama_organisasi ?? $logoProdi->program_studi }}" class="kta-bem-logo" style="object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
-                                                    <div class="kta-bem-title">
-                                                        <span class="kta-bem-big">{{ $logoProdi->singkatan ?? 'ORMAWA' }}</span>
-                                                        <span class="kta-bem-sub">{{ $logoProdi->nama_organisasi ?? $logoProdi->program_studi }}</span>
-                                                        <span class="kta-bem-sub">UNIVERSITAS IBNU SINA</span>
-                                                    </div>
-                                                @else
-                                                    <svg class="kta-bem-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <circle cx="50" cy="50" r="46" stroke="#004724" stroke-width="3" fill="#ffffff" />
-                                                        <circle cx="50" cy="50" r="41" stroke="#004724" stroke-width="1" stroke-dasharray="2 2" fill="#ffffff" />
-                                                        <path id="curve" d="M 18,52 A 32,32 0 1,1 82,52" fill="transparent"/>
-                                                        <text font-size="7.2" font-weight="900" fill="#004724" letter-spacing="1">
-                                                            <textPath href="#curve" startOffset="50%" text-anchor="middle">BADAN EKSEKUTIF MAHASISWA</textPath>
-                                                        </text>
-                                                        <circle cx="50" cy="50" r="19" fill="#004724" />
-                                                        <polygon points="50,37 53,45 61,45 55,50 57,58 50,53 43,58 45,50 39,45 47,45" fill="#facc15" />
-                                                        <text x="50" y="74" font-size="5.8" font-weight="800" fill="#004724" text-anchor="middle" font-family="'Poppins', sans-serif">UNIVERSITAS IBNU SINA</text>
-                                                    </svg>
-                                                    <div class="kta-bem-title">
-                                                        <span class="kta-bem-big">BEM</span>
-                                                        <span class="kta-bem-sub">BADAN EKSEKUTIF MAHASISWA</span>
-                                                        <span class="kta-bem-sub">UNIVERSITAS IBNU SINA</span>
-                                                    </div>
-                                                @endif
-                                            </div>
-
-                                            <!-- Green Banner Titles -->
-                                            <div class="kta-banner-left">
-                                                <div class="kta-banner-main">KARTU TANDA ANGGOTA</div>
-                                                <div class="kta-banner-sub">{{ (isset($logoProdi) && $logoProdi && $logoProdi->nama_organisasi) ? $logoProdi->nama_organisasi : 'BEM UNIVERSITAS IBNU SINA' }}</div>
-                                            </div>
-
-                                            <div class="kta-banner-right">
-                                                <div class="kta-banner-period-label">PERIODE</div>
-                                                <div class="kta-banner-period-year">2026 – 2027</div>
-                                            </div>
-
-                                            <!-- User Photo Profile -->
-                                            <div class="kta-photo-wrapper">
-                                                <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="kta-photo-img">
-                                            </div>
-
-                                            <!-- User Info Table -->
-                                            <div class="kta-info-table">
-                                                <table class="kta-table">
-                                                    <tr>
-                                                        <td class="kta-label">Nama</td>
-                                                        <td class="kta-colon">:</td>
-                                                        <td class="kta-value">{{ $user->name }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="kta-label">NIM</td>
-                                                        <td class="kta-colon">:</td>
-                                                        <td class="kta-value">{{ $user->nim ?? '-' }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="kta-label">Fakultas</td>
-                                                        <td class="kta-colon">:</td>
-                                                        <td class="kta-value">{{ $user->fakultas ?? '-' }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="kta-label">Program Studi</td>
-                                                        <td class="kta-colon">:</td>
-                                                        <td class="kta-value">{{ $user->program_studi ?? '-' }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="kta-label">Jabatan</td>
-                                                        <td class="kta-colon">:</td>
-                                                        <td class="kta-value">
-                                                            @if ($user->jabatan && $user->organisasi)
-                                                                {{ $user->jabatan }} - {{ $user->organisasi }}
-                                                            @elseif ($user->jabatan)
-                                                                {{ $user->jabatan }}
-                                                            @elseif ($user->organisasi)
-                                                                {{ $user->organisasi }}
-                                                            @else
-                                                                -
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-
-                                            <!-- QR Code Section -->
-                                            <div class="kta-qrcode-section">
-                                                <div class="kta-qrcode-box">
-                                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode('VERIFIKASI-KTA-BEM-UIS|' . ($user->nim ?? $user->id) . '|' . $user->name) }}"
-                                                        alt="QR Code" class="kta-qrcode-img">
-                                                </div>
-                                                <div class="kta-qrcode-text">
-                                                    <strong>Scan QR Code</strong>
-                                                    <span>untuk verifikasi keanggotaan BEM Universitas Ibnu Sina</span>
-                                                </div>
-                                            </div>
-
-                                            <!-- Masa Berlaku Text inside green pill -->
-                                            <div class="kta-expiry-section">
-                                                <span class="kta-expiry-label">Masa Berlaku:</span>
-                                                <span class="kta-expiry-val">Tahun Kepengurusan 2026 – 2027</span>
-                                            </div>
+                                <!-- Tab Navigasi Masing-masing Kartu jika > 1 -->
+                                @if(isset($ktaCards) && count($ktaCards) > 1)
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="small fw-semibold text-muted">
+                                                <i class="bi bi-collection me-1 text-primary"></i>Pilih Kartu Organisasi:
+                                            </span>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                                {{ count($ktaCards) }} Kartu Tersedia
+                                            </span>
                                         </div>
+                                        <ul class="nav nav-pills gap-2 p-2 bg-light rounded-3 border" id="pills-kta-tab" role="tablist">
+                                            @foreach($ktaCards as $index => $card)
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link py-2 px-3 fw-semibold {{ $index === 0 ? 'active' : '' }}" 
+                                                            id="pill-btn-{{ $card['id'] }}" 
+                                                            data-bs-toggle="pill" 
+                                                            data-bs-target="#tab-card-{{ $card['id'] }}" 
+                                                            type="button" 
+                                                            role="tab"
+                                                            onclick="switchKtaCard('{{ $card['id'] }}', '{{ Str::slug($card['singkatan'], '_') }}')">
+                                                        <i class="bi bi-patch-check me-1"></i> {{ $card['tab_title'] }}
+                                                        <span class="badge bg-white text-dark ms-1 shadow-sm border">{{ $card['badge'] }}</span>
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                        </ul>
                                     </div>
+                                @endif
+
+                                <!-- Tab Content Kartu Masing-masing -->
+                                <div class="tab-content" id="pills-kta-tabContent">
+                                    @if(isset($ktaCards))
+                                        @foreach($ktaCards as $index => $card)
+                                            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="tab-card-{{ $card['id'] }}" role="tabpanel">
+                                                <div class="d-flex justify-content-center p-2 p-md-3 bg-light rounded-3 border">
+                                                    <div id="print-area-{{ $card['id'] }}" class="kta-card-container {{ $index === 0 ? 'kta-print-active' : '' }}">
+                                                        <div id="card-body-{{ $card['id'] }}" class="kta-card-body" style="background-image: url('{{ $ktaSetting->background_url ?? asset('assets/img/ktm.png') }}');">
+                                                            <!-- Top Header: Logo & Title -->
+                                                            <div class="kta-bem-header">
+                                                                <img src="{{ $card['logo_url'] }}" alt="{{ $card['nama_org'] }}" class="kta-bem-logo" style="object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+                                                                <div class="kta-bem-title">
+                                                                    <span class="kta-bem-big">{{ $card['singkatan'] }}</span>
+                                                                    <span class="kta-bem-sub">{{ $card['nama_org'] }}</span>
+                                                                    <span class="kta-bem-sub">{{ $ktaSetting->nama_universitas ?? 'UNIVERSITAS IBNU SINA' }}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Green Banner Titles -->
+                                                            <div class="kta-banner-left">
+                                                                <div class="kta-banner-main">KARTU TANDA ANGGOTA</div>
+                                                                <div class="kta-banner-sub">{{ $card['banner_sub'] }}</div>
+                                                            </div>
+
+                                                            <div class="kta-banner-right">
+                                                                <div class="kta-banner-period-label">{{ $ktaSetting->label_periode ?? 'PERIODE' }}</div>
+                                                                <div class="kta-banner-period-year">{{ $ktaSetting->tahun_periode ?? '2026 – 2027' }}</div>
+                                                            </div>
+
+                                                            <!-- User Photo Profile -->
+                                                            <div class="kta-photo-wrapper">
+                                                                <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="kta-photo-img">
+                                                            </div>
+
+                                                            <!-- User Info Table -->
+                                                            <div class="kta-info-table">
+                                                                <table class="kta-table">
+                                                                    <tr>
+                                                                        <td class="kta-label">Nama</td>
+                                                                        <td class="kta-colon">:</td>
+                                                                        <td class="kta-value">{{ $user->name }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="kta-label">NIM</td>
+                                                                        <td class="kta-colon">:</td>
+                                                                        <td class="kta-value">{{ $user->nim ?? '-' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="kta-label">Fakultas</td>
+                                                                        <td class="kta-colon">:</td>
+                                                                        <td class="kta-value">{{ $user->fakultas ?? '-' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="kta-label">Program Studi</td>
+                                                                        <td class="kta-colon">:</td>
+                                                                        <td class="kta-value">{{ $user->program_studi ?? '-' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="kta-label">Jabatan</td>
+                                                                        <td class="kta-colon">:</td>
+                                                                        <td class="kta-value fw-bold text-dark">{{ $card['jabatan'] }}</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+
+                                                            <!-- QR Code Section -->
+                                                            <div class="kta-qrcode-section">
+                                                                <div class="kta-qrcode-box">
+                                                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $card['qr_data'] }}"
+                                                                        alt="QR Code" class="kta-qrcode-img">
+                                                                </div>
+                                                                <div class="kta-qrcode-text">
+                                                                    <strong>Scan QR Code</strong>
+                                                                    <span>{{ $card['qr_text'] }}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Masa Berlaku Text inside green pill -->
+                                                            <div class="kta-expiry-section">
+                                                                <span class="kta-expiry-label">{{ $ktaSetting->label_masa_berlaku ?? 'Masa Berlaku:' }}</span>
+                                                                <span class="kta-expiry-val">{{ $ktaSetting->teks_masa_berlaku ?? 'Tahun Kepengurusan 2026 – 2027' }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
 
                                 <div class="alert alert-light border mt-3 d-flex align-items-center mb-0 py-2 small">
                                     <i class="bi bi-info-circle text-primary fs-5 me-2"></i>
                                     <div>
-                                        Jika data profil (Nama, Foto, NIM, Fakultas, Prodi, atau Jabatan) diperbarui pada tab <strong>Edit Profil</strong>, Kartu Tanda Anggota ini akan otomatis ikut terupdate.
+                                        Jika data profil (Nama, Foto, NIM, Fakultas, Prodi, atau Jabatan) diperbarui pada tab <strong>Edit Profil</strong>, seluruh Kartu Tanda Anggota ini akan otomatis ikut terupdate.
                                     </div>
                                 </div>
                             </div>
@@ -585,7 +588,7 @@
             position: relative;
             width: 100%;
             aspect-ratio: 2148 / 1358;
-            background-image: url('{{ asset('assets/img/ktm.png') }}');
+            background-image: url('{{ $ktaSetting->background_url ?? asset('assets/img/ktm.png') }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -830,12 +833,12 @@
                 visibility: hidden !important;
             }
 
-            #kta-card-print-area,
-            #kta-card-print-area * {
+            .kta-print-active,
+            .kta-print-active * {
                 visibility: visible !important;
             }
 
-            #kta-card-print-area {
+            .kta-print-active {
                 position: fixed !important;
                 left: 50% !important;
                 top: 50% !important;
@@ -1029,137 +1032,200 @@
 
                 updateProfOrgDisplay();
 
-                // Dynamic Jabatan Options Logic for Profile (SK 2026-2027)
+                // Dynamic Jabatan Options Logic for Profile (SK 2026-2027 per Masing-masing Organisasi)
                 const JABATAN_BY_ORG = @json($jabatan_by_org ?? []);
                 const JABATAN_GENERAL = @json($jabatan ?? []);
-                const profJabatanSelect = document.getElementById('jabatan');
-                const profJabatanCustomWrapper = document.getElementById('prof-wrapper-jabatan-custom');
-                const profJabatanCustomInput = document.getElementById('prof_jabatan_custom');
-                const profJabatanHint = document.getElementById('prof-jabatan-context-hint');
-                const userCurrentJabatan = "{{ old('jabatan', $user->jabatan ?? '') }}";
+                const profJabatanContainer = document.getElementById('prof-organisasi-jabatan-list');
+                const profNoOrgHint = document.getElementById('prof-no-org-selected-hint');
+                const userSavedJabatanMap = @json($userJabatanMap ?? []);
+                const oldJabatanOrg = @json(old('jabatan_org', []));
+                const oldJabatanCustom = @json(old('jabatan_custom', []));
 
-                function updateProfJabatanOptions() {
-                    if (!profJabatanSelect) return;
+                const profSelectedJabatanState = { ...userSavedJabatanMap, ...oldJabatanOrg };
+                const profSelectedCustomState = { ...oldJabatanCustom };
+
+                function updateProfJabatanPerOrgList() {
+                    if (!profJabatanContainer) return;
 
                     const checkedBoxes = Array.from(document.querySelectorAll('.prof-org-item-checkbox:checked'));
-                    const checkedValues = checkedBoxes.map(cb => cb.value);
 
-                    let matchingGroups = {};
-                    let hasOrgMatch = false;
+                    if (checkedBoxes.length === 0) {
+                        profJabatanContainer.innerHTML = '';
+                        if (profNoOrgHint) profNoOrgHint.style.display = 'block';
+                        return;
+                    }
 
-                    checkedValues.forEach(orgKey => {
-                        if (JABATAN_BY_ORG[orgKey]) {
-                            hasOrgMatch = true;
-                            matchingGroups[orgKey] = JABATAN_BY_ORG[orgKey];
-                        }
+                    if (profNoOrgHint) profNoOrgHint.style.display = 'none';
+
+                    // Simpan state sebelum re-render
+                    document.querySelectorAll('.prof-select-jabatan-per-org').forEach(sel => {
+                        const org = sel.getAttribute('data-org');
+                        if (org) profSelectedJabatanState[org] = sel.value;
+                    });
+                    document.querySelectorAll('.prof-custom-input-per-org').forEach(inp => {
+                        const org = inp.getAttribute('data-org');
+                        if (org) profSelectedCustomState[org] = inp.value;
                     });
 
-                    const currentVal = profJabatanSelect.value || userCurrentJabatan;
-                    profJabatanSelect.innerHTML = '<option value="">-- Pilih Jabatan / Posisi --</option>';
+                    profJabatanContainer.innerHTML = '';
 
-                    if (hasOrgMatch) {
-                        if (profJabatanHint) {
-                            profJabatanHint.innerHTML = '<span class="text-success fw-semibold"><i class="bi bi-shield-check me-1"></i>Sesuai SK Pengurus 2026-2027</span>';
-                        }
+                    checkedBoxes.forEach(cb => {
+                        const orgKey = cb.value;
+                        const orgLabel = cb.getAttribute('data-label') || orgKey;
+                        const shortLabel = orgLabel.split('(')[0].replace(' - ', ' ').trim();
+                        const currentVal = profSelectedJabatanState[orgKey] || '';
+                        const currentCustom = profSelectedCustomState[orgKey] || '';
 
-                        for (const [orgName, groups] of Object.entries(matchingGroups)) {
-                            const shortOrgName = orgName.split(' - ')[0].replace('Universitas Ibnu Sina', 'UIS').trim();
-                            for (const [groupName, items] of Object.entries(groups)) {
+                        const card = document.createElement('div');
+                        card.className = 'p-3 rounded-3 border bg-white shadow-sm';
+                        card.style.borderColor = '#e2e8f0';
+
+                        // Header Card
+                        const header = document.createElement('div');
+                        header.className = 'd-flex align-items-center justify-content-between mb-2 pb-1 border-bottom';
+                        header.innerHTML = `
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold" style="font-size: 0.72rem;">
+                                    <i class="bi bi-diagram-3 me-1"></i>${shortLabel}
+                                </span>
+                                <span class="small fw-bold text-dark text-truncate" style="max-width: 250px;">${orgKey}</span>
+                            </div>
+                            <span class="badge bg-light text-muted border small" style="font-size: 0.68rem;">Pilih Jabatan</span>
+                        `;
+                        card.appendChild(header);
+
+                        // Select Box
+                        const select = document.createElement('select');
+                        select.name = `jabatan_org[${orgKey}]`;
+                        select.className = 'form-select form-select-sm prof-select-jabatan-per-org';
+                        select.setAttribute('data-org', orgKey);
+
+                        select.innerHTML = `<option value="">-- Pilih Jabatan di ${shortLabel} --</option>`;
+
+                        const orgGroups = JABATAN_BY_ORG[orgKey];
+                        if (orgGroups) {
+                            for (const [groupName, items] of Object.entries(orgGroups)) {
                                 const optgroup = document.createElement('optgroup');
-                                optgroup.label = `${shortOrgName} • ${groupName}`;
+                                optgroup.label = groupName;
                                 items.forEach(item => {
                                     const opt = document.createElement('option');
                                     opt.value = item;
                                     opt.textContent = item;
-                                    if (item === currentVal) {
-                                        opt.selected = true;
-                                    }
+                                    if (item === currentVal) opt.selected = true;
                                     optgroup.appendChild(opt);
                                 });
-                                profJabatanSelect.appendChild(optgroup);
+                                select.appendChild(optgroup);
                             }
-                        }
-                    } else {
-                        if (profJabatanHint) {
-                            profJabatanHint.textContent = 'Pilihan Jabatan Standar';
-                        }
-                        for (const [groupName, items] of Object.entries(JABATAN_GENERAL)) {
-                            const optgroup = document.createElement('optgroup');
-                            optgroup.label = groupName;
-                            for (const [val, label] of Object.entries(items)) {
-                                const opt = document.createElement('option');
-                                opt.value = val;
-                                opt.textContent = label;
-                                if (val === currentVal) {
-                                    opt.selected = true;
+                        } else {
+                            for (const [groupName, items] of Object.entries(JABATAN_GENERAL)) {
+                                const optgroup = document.createElement('optgroup');
+                                optgroup.label = groupName;
+                                for (const [val, label] of Object.entries(items)) {
+                                    const opt = document.createElement('option');
+                                    opt.value = val;
+                                    opt.textContent = label;
+                                    if (val === currentVal) opt.selected = true;
+                                    optgroup.appendChild(opt);
                                 }
-                                optgroup.appendChild(opt);
+                                select.appendChild(optgroup);
                             }
-                            profJabatanSelect.appendChild(optgroup);
                         }
-                    }
 
-                    // Selalu tambahkan opsi Lainnya
-                    const hasLainnya = Array.from(profJabatanSelect.options).some(o => o.value === 'Lainnya');
-                    if (!hasLainnya) {
-                        const optLainnya = document.createElement('option');
-                        optLainnya.value = 'Lainnya';
-                        optLainnya.textContent = 'Lainnya (Ketik Manual)...';
-                        if (currentVal === 'Lainnya') {
-                            optLainnya.selected = true;
+                        // Opsi Lainnya
+                        if (!Array.from(select.options).some(o => o.value === 'Lainnya')) {
+                            const optLainnya = document.createElement('option');
+                            optLainnya.value = 'Lainnya';
+                            optLainnya.textContent = 'Lainnya (Ketik Manual)...';
+                            if (currentVal === 'Lainnya') optLainnya.selected = true;
+                            select.appendChild(optLainnya);
                         }
-                        profJabatanSelect.appendChild(optLainnya);
-                    }
 
-                    // Pertahankan jika user memiliki jabatan custom
-                    if (currentVal && currentVal !== 'Lainnya' && !Array.from(profJabatanSelect.options).some(o => o.value === currentVal)) {
-                        const customOpt = document.createElement('option');
-                        customOpt.value = currentVal;
-                        customOpt.textContent = currentVal;
-                        customOpt.selected = true;
-                        profJabatanSelect.insertBefore(customOpt, profJabatanSelect.lastElementChild);
-                    }
-
-                    checkProfCustomJabatan();
-                }
-
-                function checkProfCustomJabatan() {
-                    if (!profJabatanSelect || !profJabatanCustomWrapper) return;
-                    if (profJabatanSelect.value === 'Lainnya') {
-                        profJabatanCustomWrapper.style.display = 'block';
-                        if (profJabatanCustomInput && !profJabatanCustomInput.value) {
-                            profJabatanCustomInput.focus();
+                        // Pertahankan jika custom text
+                        if (currentVal && currentVal !== 'Lainnya' && !Array.from(select.options).some(o => o.value === currentVal)) {
+                            const customOpt = document.createElement('option');
+                            customOpt.value = currentVal;
+                            customOpt.textContent = currentVal;
+                            customOpt.selected = true;
+                            select.insertBefore(customOpt, select.lastElementChild);
                         }
-                    } else {
-                        profJabatanCustomWrapper.style.display = 'none';
-                    }
-                }
 
-                if (profJabatanSelect) {
-                    profJabatanSelect.addEventListener('change', checkProfCustomJabatan);
-                }
+                        card.appendChild(select);
 
-                profOrgCheckboxes.forEach(cb => {
-                    cb.addEventListener('change', updateProfJabatanOptions);
-                });
-                if (btnResetProfOrg) {
-                    btnResetProfOrg.addEventListener('click', function() {
-                        setTimeout(updateProfJabatanOptions, 10);
+                        // Custom Input
+                        const customWrapper = document.createElement('div');
+                        customWrapper.className = 'mt-2';
+                        customWrapper.style.display = (select.value === 'Lainnya' || currentCustom) ? 'block' : 'none';
+
+                        const customInput = document.createElement('input');
+                        customInput.type = 'text';
+                        customInput.name = `jabatan_custom[${orgKey}]`;
+                        customInput.className = 'form-control form-control-sm prof-custom-input-per-org';
+                        customInput.setAttribute('data-org', orgKey);
+                        customInput.placeholder = `Ketik jabatan spesifik di ${shortLabel}...`;
+                        customInput.value = currentCustom;
+
+                        customWrapper.appendChild(customInput);
+                        card.appendChild(customWrapper);
+
+                        select.addEventListener('change', function() {
+                            profSelectedJabatanState[orgKey] = this.value;
+                            if (this.value === 'Lainnya') {
+                                customWrapper.style.display = 'block';
+                                customInput.focus();
+                            } else {
+                                customWrapper.style.display = 'none';
+                            }
+                        });
+
+                        customInput.addEventListener('input', function() {
+                            profSelectedCustomState[orgKey] = this.value;
+                        });
+
+                        profJabatanContainer.appendChild(card);
                     });
                 }
 
-                updateProfJabatanOptions();
+                profOrgCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', updateProfJabatanPerOrgList);
+                });
+                if (btnResetProfOrg) {
+                    btnResetProfOrg.addEventListener('click', function() {
+                        setTimeout(updateProfJabatanPerOrgList, 10);
+                    });
+                }
+
+                updateProfJabatanPerOrgList();
             }
         });
 
-        // Print Card
+        // Tracking Active KTA Card for Multi-Card System
+        let currentKtaId = '{{ isset($ktaCards) && count($ktaCards) > 0 ? $ktaCards[0]['id'] : "kta-default" }}';
+        let currentKtaSlug = '{{ isset($ktaCards) && count($ktaCards) > 0 ? Str::slug($ktaCards[0]['singkatan'], "_") : "KTM" }}';
+
+        function switchKtaCard(cardId, cardSlug) {
+            currentKtaId = cardId;
+            currentKtaSlug = cardSlug;
+
+            document.querySelectorAll('.kta-card-container').forEach(el => el.classList.remove('kta-print-active'));
+            const activePrintTarget = document.getElementById(`print-area-${currentKtaId}`);
+            if (activePrintTarget) {
+                activePrintTarget.classList.add('kta-print-active');
+            }
+        }
+
+        // Print Active KTA Card
         function printKtaCard() {
+            document.querySelectorAll('.kta-card-container').forEach(el => el.classList.remove('kta-print-active'));
+            const activePrintTarget = document.getElementById(`print-area-${currentKtaId}`);
+            if (activePrintTarget) {
+                activePrintTarget.classList.add('kta-print-active');
+            }
             window.print();
         }
 
-        // Download Card as PNG using html2canvas
+        // Download Active KTA Card as PNG using html2canvas
         function downloadKtaCard() {
-            const card = document.getElementById('kta-card');
+            const card = document.getElementById(`card-body-${currentKtaId}`);
             const btn = document.getElementById('btn-download-kta');
             if (!card) return;
 
@@ -1174,7 +1240,7 @@
                 backgroundColor: null,
             }).then(function(canvas) {
                 const link = document.createElement('a');
-                link.download = 'KTM_BEM_{{ Str::slug($user->name, "_") }}.png';
+                link.download = `KTA_${currentKtaSlug}_{{ Str::slug($user->name, "_") }}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             }).catch(function(err) {

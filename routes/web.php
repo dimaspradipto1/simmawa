@@ -13,6 +13,7 @@ use App\Http\Controllers\SertifikasiController;
 use App\Http\Controllers\LogoProdiController;
 use App\Http\Controllers\TemplateLpjController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\KtaSettingController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -72,6 +73,10 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
 
     // Logo Prodi Resource Routes
     Route::resource('logo-prodi', LogoProdiController::class);
+
+    // Pengaturan KTA / KTM Resource Routes (Superadmin & Admin BKAK)
+    Route::get('kta-setting', [KtaSettingController::class, 'index'])->name('kta-setting.index');
+    Route::put('kta-setting', [KtaSettingController::class, 'update'])->name('kta-setting.update');
 
     // Template LPJ Resource Routes
     Route::get('template-lpj/{template_lpj}/download', [TemplateLpjController::class, 'download'])->name('template-lpj.download');
