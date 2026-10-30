@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Login | SIPENA - Sistem Informasi Kinerja & Tata Kelola Kemahasiswaan</title>
-    <meta content="Portal Login Sistem Informasi Kinerja dan Tata Kelola Kemahasiswaan (SIPENA)" name="description">
-    <meta content="sipena, kemahasiswaan, login, tata kelola, kinerja" name="keywords">
+    <title>Login | SIMMAWA - Sistem Informasi Manajemen Kemahasiswaan</title>
+    <meta content="Portal Login Sistem Informasi Manajemen Kemahasiswaan (SIMMAWA)" name="description">
+    <meta content="simmawa, kemahasiswaan, login, tata kelola, kinerja, uis" name="keywords">
 
     <!-- Favicons -->
     <link href="{{ asset('assets/img/logo_uis.png') }}" rel="icon">
@@ -387,7 +387,7 @@
             <div class="card-left">
                 <div class="brand-header">
                     <img src="{{ asset('assets/img/logo_uis.png') }}" class="brand-logo" alt="Logo UIS" height="42" width="42">
-                    <span class="brand-name">SIPENA UIS</span>
+                    <span class="brand-name">SIMMAWA UIS</span>
                 </div>
 
                 <div class="brand-body-content">
@@ -417,7 +417,7 @@
                     <!-- Mobile Header (Show only on small screens) -->
                     <div class="text-center d-lg-none mb-4">
                         <img src="{{ asset('assets/img/logo_uis.png') }}" alt="Logo UIS" height="60" width="60" class="mb-2">
-                        <h2 class="fw-bold" style="color: var(--primary-green); font-family: 'Nunito', sans-serif; margin-bottom: 0; font-size: 1.6rem;">SIPENA UIS</h2>
+                        <h2 class="fw-bold" style="color: var(--primary-green); font-family: 'Nunito', sans-serif; margin-bottom: 0; font-size: 1.6rem;">SIMMAWA UIS</h2>
                         <p class="text-secondary small mb-0" style="font-weight: 500;">Kemahasiswaan Universitas Ibnu Sina</p>
                     </div>
 

@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         $users = [
             // Superadmin
             [
-                'name'      => 'Super Admin SIPENA',
+                'name'      => 'Super Admin SIMMAWA',
                 'email'     => 'superadmin@uis.ac.id',
                 'password'  => Hash::make('password'),
                 'role'      => 'superadmin',
@@ -149,18 +149,28 @@ class UserSeeder extends Seeder
 
             // Mahasiswa
             [
-                'name'      => 'Mahasiswa Berprestasi',
-                'email'     => 'mahasiswa@uis.ac.id',
-                'password'  => Hash::make('password'),
-                'role'      => 'mahasiswa',
-                'is_active' => true,
+                'name'          => 'Mahasiswa Berprestasi',
+                'email'         => 'mahasiswa@uis.ac.id',
+                'password'      => Hash::make('password'),
+                'role'          => 'mahasiswa',
+                'nim'           => '201055201001',
+                'fakultas'      => 'Fakultas Sains dan Teknologi',
+                'program_studi' => 'S1 - Teknik Informatika',
+                'organisasi'    => 'BEM Universitas Ibnu Sina, HMTI - Teknik Informatika',
+                'jabatan'       => 'Presiden Mahasiswa (Presma) (BEM UIS), Anggota (HMTI)',
+                'is_active'     => true,
             ],
             [
-                'name'      => 'Frida Ayu Wulandari',
-                'email'     => 'frida.wulandari@student.uis.ac.id',
-                'password'  => Hash::make('password'),
-                'role'      => 'mahasiswa',
-                'is_active' => true,
+                'name'          => 'Frida Ayu Wulandari',
+                'email'         => 'frida.wulandari@student.uis.ac.id',
+                'password'      => Hash::make('password'),
+                'role'          => 'mahasiswa',
+                'nim'           => '201055201025',
+                'fakultas'      => 'Fakultas Ekonomi dan Bisnis',
+                'program_studi' => 'S1 - Manajemen',
+                'organisasi'    => 'HMM - Manajemen',
+                'jabatan'       => 'Ketua (HMM)',
+                'is_active'     => true,
             ],
             [
                 'name'      => 'Rizky Pratama Putra',

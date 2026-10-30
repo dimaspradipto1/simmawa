@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('logo_prodis', function (Blueprint $table) {
             $table->id();
-            $table->string('program_studi');
+            $table->string('kategori')->default('Himpunan Mahasiswa (HIMA)');
+            $table->string('program_studi')->nullable();
             $table->string('fakultas')->nullable();
             $table->string('nama_organisasi')->nullable();
             $table->string('singkatan')->nullable();

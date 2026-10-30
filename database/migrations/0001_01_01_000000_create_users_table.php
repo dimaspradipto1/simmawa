@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('nim')->nullable();
             $table->string('fakultas')->nullable();
             $table->string('program_studi')->nullable();
-            $table->string('jabatan')->nullable();
+            $table->text('organisasi')->nullable();
+            $table->text('jabatan')->nullable();
             $table->string('photo_profile')->nullable();
             $table->boolean('is_active')->default(true);
             $table->rememberToken();

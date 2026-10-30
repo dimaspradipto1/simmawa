@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('program_studi')->nullable();
             $table->string('email')->nullable();
             $table->string('no_hp')->nullable();
+            $table->string('url_surat_tugas')->nullable();
             $table->enum('status', ['Aktif', 'Non-Aktif'])->default('Aktif');
             $table->timestamps();
         });

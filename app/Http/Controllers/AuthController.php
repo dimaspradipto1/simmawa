@@ -707,7 +707,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('dashboard.index')
-            ->with('success', 'Pendaftaran berhasil! Selamat datang di SIPENA UIS, ' . $user->name . '.');
+            ->with('success', 'Pendaftaran berhasil! Selamat datang di SIMMAWA UIS, ' . $user->name . '.');
     }
 
     public function authenticate(AuthRequest $request)

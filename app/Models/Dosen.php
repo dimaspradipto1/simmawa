@@ -12,6 +12,7 @@ class Dosen extends Model
         'program_studi',
         'email',
         'no_hp',
+        'url_surat_tugas',
         'status',
     ];
 }

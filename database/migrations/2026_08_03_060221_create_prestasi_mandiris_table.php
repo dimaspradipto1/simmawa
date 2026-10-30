@@ -27,6 +27,8 @@ return new class extends Migration
             $table->date('tanggal_sertifikat')->nullable();
             $table->string('link_foto_upp')->nullable();
             $table->string('link_dokumen_undangan')->nullable();
+            $table->string('link_dokumen_lpj')->nullable();
+            $table->string('file_dokumen_lpj')->nullable();
             $table->text('keterangan')->nullable();
             $table->integer('tahun')->nullable();
             $table->string('pt')->default('Universitas Ibnu Sina');

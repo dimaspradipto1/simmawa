@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             KejuaraanSeeder::class,
             DosenSeeder::class,
             TemplateLpjSeeder::class,
+            KtaSettingSeeder::class,
         ]);
     }
 }

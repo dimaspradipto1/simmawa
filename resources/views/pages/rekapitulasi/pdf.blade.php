@@ -351,7 +351,7 @@
         <div class="signature-box">
             <p>Batam, {{ date('d F Y') }}<br><strong>Administrator Pelaksana</strong></p>
             <div class="signature-space"></div>
-            <p><u><strong>{{ auth()->user()->name }}</strong></u><br>SIPENA Universitas Ibnu Sina</p>
+            <p><u><strong>{{ auth()->user()->name }}</strong></u><br>SIMMAWA Universitas Ibnu Sina</p>
         </div>
     </div>
 
