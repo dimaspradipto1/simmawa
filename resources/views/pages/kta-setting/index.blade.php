@@ -607,17 +607,38 @@
             });
         }
 
-        // Live preview custom background image file selection
+        // Live preview & size validation for custom background image
         if (inputBgCard && liveCardBody) {
+            const originalBg = liveCardBody.style.backgroundImage;
+
             inputBgCard.addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        liveCardBody.style.backgroundImage = `url('${event.target.result}')`;
-                    };
-                    reader.readAsDataURL(file);
+                if (!file) return;
+
+                if (file.size > 2 * 1024 * 1024) {
+                    const actualMB = (file.size / (1024 * 1024)).toFixed(2);
+                    inputBgCard.value = '';
+                    liveCardBody.style.backgroundImage = originalBg;
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Ukuran File Terlalu Besar!',
+                            html: `File background yang Anda pilih berukuran <strong>${actualMB} MB</strong>.<br>Batas maksimal ukuran file adalah <strong>2 MB</strong>.<br><br><span class="text-secondary small">Silakan pilih gambar dengan ukuran lebih kecil atau kompres terlebih dahulu.</span>`,
+                            confirmButtonColor: '#046B26',
+                            confirmButtonText: 'Baik, Saya Mengerti'
+                        });
+                    } else {
+                        alert(`Ukuran file background terlalu besar (${actualMB} MB)! Maksimal 2 MB.`);
+                    }
+                    return;
                 }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    liveCardBody.style.backgroundImage = `url('${event.target.result}')`;
+                };
+                reader.readAsDataURL(file);
             });
         }
     });

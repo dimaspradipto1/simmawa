@@ -101,10 +101,10 @@
                             <label class="form-label fw-semibold">File Logo <small class="text-muted">(Kosongkan jika tidak ingin mengubah file logo)</small></label>
                             <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border">
                                 <div class="bg-white rounded border d-flex align-items-center justify-content-center p-2 shadow-sm" style="width: 85px; height: 85px; flex-shrink: 0;">
-                                    <img id="logo-preview" src="{{ $logoProdi->logo_url }}" alt="Preview Logo" class="img-fluid" style="max-height: 75px; object-fit: contain;">
+                                    <img id="logo-preview" src="{{ $logoProdi->logo_url }}" data-default-src="{{ $logoProdi->logo_url }}" alt="Preview Logo" class="img-fluid" style="max-height: 75px; object-fit: contain;">
                                 </div>
                                 <div class="flex-grow-1">
-                                    <input type="file" class="form-control @error('logo') is-invalid @enderror" id="logo" name="logo" accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml">
+                                    <input type="file" class="form-control @error('logo') is-invalid @enderror" id="logo" name="logo" data-max-size="2" accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml">
                                     <div class="form-text small text-muted mt-1">
                                         Format: PNG (disarankan transparan), JPG, JPEG, WEBP, atau SVG. Maksimal ukuran file: 2 MB.
                                     </div>
@@ -203,17 +203,38 @@
         kategoriSelect.addEventListener('change', updateFormByKategori);
         updateFormByKategori();
 
-        // Preview Logo
+        // Preview & Validasi Ukuran Logo (Maksimal 2 MB)
         if (logoInput) {
+            const defaultSrc = previewImg ? (previewImg.dataset.defaultSrc || previewImg.src) : '';
+
             logoInput.addEventListener('change', function (e) {
                 const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        if (previewImg) previewImg.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
+                if (!file) return;
+
+                if (file.size > 2 * 1024 * 1024) {
+                    const actualMB = (file.size / (1024 * 1024)).toFixed(2);
+                    logoInput.value = '';
+                    if (previewImg) previewImg.src = defaultSrc;
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Ukuran File Terlalu Besar!',
+                            html: `File yang Anda pilih berukuran <strong>${actualMB} MB</strong>.<br>Batas maksimal ukuran file logo adalah <strong>2 MB</strong>.<br><br><span class="text-secondary small">Silakan pilih file gambar dengan ukuran lebih kecil atau kompres terlebih dahulu.</span>`,
+                            confirmButtonColor: '#046B26',
+                            confirmButtonText: 'Baik, Saya Mengerti'
+                        });
+                    } else {
+                        alert(`Ukuran file logo terlalu besar (${actualMB} MB)! Batas maksimal adalah 2 MB.`);
+                    }
+                    return;
                 }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    if (previewImg) previewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
             });
         }
     });
