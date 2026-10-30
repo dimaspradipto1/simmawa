@@ -16,11 +16,12 @@ class AuthController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard.index');
         }
+
         return view('layouts.auth.login');
     }
 
     /**
-     * Master data Fakultas, Program Studi, Organisasi, dan Jabatan UIS.
+     * Master Data Fakultas, Prodi, Organisasi, dan Jabatan Resmi UIS SK 2026-2027.
      */
     public static function getMasterAcademicAndOrgData(): array
     {
@@ -84,14 +85,557 @@ class AuthController extends Controller
                     'UKM Gerakan Pramuka Racana'    => 'UKM Gerakan Pramuka Racana Raja H Fisabilillah - Srikandi Walanda',
                 ],
             ],
+
+            // Jabatan Umum Terstruktur (untuk fallback / belum memilih ormawa)
             'jabatan' => [
-                'Anggota'                    => 'Anggota',
-                'Ketua Umum'                 => 'Ketua Umum',
-                'Wakil Ketua'                => 'Wakil Ketua',
-                'Sekretaris'                 => 'Sekretaris',
-                'Bendahara'                  => 'Bendahara',
-                'Koordinator Divisi'         => 'Koordinator Divisi',
-                'Anggota Divisi / Pengurus'  => 'Anggota Divisi / Pengurus',
+                'Pimpinan Utama Organisasi' => [
+                    'Presiden Mahasiswa (Presma)'     => 'Presiden Mahasiswa (Presma)',
+                    'Wakil Presiden Mahasiswa (Wapresma)' => 'Wakil Presiden Mahasiswa (Wapresma)',
+                    'Ketua DPM'                       => 'Ketua DPM',
+                    'Wakil Ketua DPM'                 => 'Wakil Ketua DPM',
+                    'Ketua Umum'                      => 'Ketua Umum',
+                    'Wakil Ketua Umum'                => 'Wakil Ketua Umum',
+                    'Ketua HIMA'                      => 'Ketua HIMA',
+                    'Wakil Ketua HIMA'                => 'Wakil Ketua HIMA',
+                    'Ketua UKM'                       => 'Ketua UKM',
+                    'Wakil Ketua UKM'                 => 'Wakil Ketua UKM',
+                    'Pimpinan Redaksi'                => 'Pimpinan Redaksi (UKM Si Pena)',
+                ],
+                'Kementerian BEM & Komisi DPM' => [
+                    'Menteri Kesekretariatan'         => 'Menteri Kesekretariatan',
+                    'Menteri Keuangan'                => 'Menteri Keuangan',
+                    'Menteri Luar Negeri'             => 'Menteri Luar Negeri',
+                    'Menteri Dalam Negeri'            => 'Menteri Dalam Negeri',
+                    'Menteri Sosial Politik dan Hukum'=> 'Menteri Sosial Politik dan Hukum',
+                    'Menteri PSDM'                    => 'Menteri Pengembangan Sumber Daya Manusia (PSDM)',
+                    'Menteri Komunikasi Digital'      => 'Menteri Komunikasi Digital',
+                    'Menteri Agama'                   => 'Menteri Agama',
+                    'Menteri Kesehatan'               => 'Menteri Kesehatan',
+                    'Ketua Komisi I DPM'              => 'Ketua Komisi I DPM',
+                    'Anggota Komisi I DPM'            => 'Anggota Komisi I DPM',
+                    'Ketua Komisi II DPM'             => 'Ketua Komisi II DPM',
+                    'Anggota Komisi II DPM'           => 'Anggota Komisi II DPM',
+                    'Ketua Komisi III DPM'            => 'Ketua Komisi III DPM',
+                    'Anggota Komisi III DPM'          => 'Anggota Komisi III DPM',
+                    'Ketua Komisi IV DPM'             => 'Ketua Komisi IV DPM',
+                    'Anggota Komisi IV DPM'           => 'Anggota Komisi IV DPM',
+                ],
+                'Kesekretariatan & Keuangan' => [
+                    'Sekretaris Jenderal'             => 'Sekretaris Jenderal (Sekjen)',
+                    'Sekretaris Umum'                 => 'Sekretaris Umum',
+                    'Sekretaris'                      => 'Sekretaris',
+                    'Sekretaris I'                    => 'Sekretaris I',
+                    'Sekretaris II'                   => 'Sekretaris II',
+                    'Bendahara'                       => 'Bendahara',
+                    'Bendahara I'                     => 'Bendahara I',
+                    'Bendahara II'                    => 'Bendahara II',
+                ],
+                'Pimpinan Departemen / Divisi / Bidang' => [
+                    'Kepala Departemen'               => 'Kepala Departemen',
+                    'Kepala Divisi'                   => 'Kepala Divisi',
+                    'Kepala Bidang'                   => 'Kepala Bidang',
+                    'Koordinator Departemen'          => 'Koordinator Departemen',
+                    'Koordinator Divisi'              => 'Koordinator Divisi',
+                    'Koordinator Bidang'              => 'Koordinator Bidang',
+                    'PIC (Person in Charge)'          => 'PIC (Person in Charge)',
+                ],
+                'Staf & Keanggotaan' => [
+                    'Staf Departemen'                 => 'Staf Departemen',
+                    'Staf Divisi'                     => 'Staf Divisi',
+                    'Personel Divisi / Bidang'        => 'Personel Divisi / Bidang',
+                    'Anggota Divisi / Pengurus'       => 'Anggota Divisi / Pengurus',
+                    'Anggota'                         => 'Anggota',
+                ],
+                'Lainnya' => [
+                    'Lainnya'                         => 'Jabatan Lainnya (Ketik Manual)',
+                ],
+            ],
+
+            // Pemetaan Jabatan Spesifik Resmi Berdasarkan SK 2026-2027
+            'jabatan_by_org' => [
+                'BEM Universitas Ibnu Sina' => [
+                    'Pimpinan BEM' => [
+                        'Presiden Mahasiswa (Presma)',
+                        'Wakil Presiden Mahasiswa (Wapresma)',
+                    ],
+                    'Kementerian Kesekretariatan' => [
+                        'Menteri Kesekretariatan',
+                        'Kepala Departemen Administrasi dan Persuratan',
+                        'Staf Departemen Administrasi dan Persuratan',
+                        'Kepala Departemen Dokumentasi dan Arsip Organisasi',
+                    ],
+                    'Kementerian Keuangan' => [
+                        'Menteri Keuangan',
+                        'Kepala Departemen Pengelolaan Keuangan Internal',
+                        'Staf Departemen Pengelolaan Keuangan Internal',
+                        'Kepala Departemen Perencanaan dan Pengawasan Anggaran',
+                        'Staf Departemen Perencanaan dan Pengawasan Anggaran',
+                    ],
+                    'Kementerian Luar Negeri' => [
+                        'Menteri Luar Negeri',
+                        'Kepala Departemen Hubungan Antar Perguruan Tinggi',
+                        'Kepala Departemen Kemitraan',
+                    ],
+                    'Kementerian Dalam Negeri' => [
+                        'Menteri Dalam Negeri',
+                        'Kepala Departemen Hubungan Organisasi Mahasiswa',
+                        'Staf Departemen Hubungan Organisasi Mahasiswa',
+                        'Kepala Departemen Pembinaan dan Prestasi Mahasiswa',
+                        'Staf Departemen Pembinaan dan Prestasi Mahasiswa',
+                    ],
+                    'Kementerian Sosial Politik dan Hukum' => [
+                        'Menteri Sosial Politik dan Hukum',
+                        'Kepala Departemen Kajian dan Aksi Sosial',
+                        'Staf Departemen Kajian dan Aksi Sosial',
+                        'Kepala Departemen Pergerakan Politik Kebijakan',
+                        'Kepala Departemen Advokasi dan Kajian Hukum',
+                        'Staf Departemen Advokasi dan Kajian Hukum',
+                    ],
+                    'Kementerian PSDM' => [
+                        'Menteri Pengembangan Sumber Daya Manusia (PSDM)',
+                        'Kepala Departemen Kaderisasi dan Kepemimpinan',
+                        'Kepala Departemen Pengembangan Kompetensi dan Karier',
+                        'Staf Departemen Pengembangan Kompetensi dan Karier',
+                    ],
+                    'Kementerian Komunikasi Digital' => [
+                        'Menteri Komunikasi Digital',
+                        'Kepala Departemen Desain Grafis',
+                        'Kepala Departemen Dokumentasi',
+                        'Staf Departemen Dokumentasi',
+                    ],
+                    'Kementerian Agama' => [
+                        'Menteri Agama',
+                        'Kepala Departemen Pembinaan Spiritual',
+                        'Kepala Departemen Pengembangan Karakter',
+                    ],
+                    'Kementerian Kesehatan' => [
+                        'Menteri Kesehatan',
+                        'Kepala Departemen Promosi, Pemberdayaan dan Edukasi',
+                        'Staf Departemen Promosi, Pemberdayaan dan Edukasi',
+                        'Kepala Departemen Kesehatan Mental',
+                        'Staf Departemen Kesehatan Mental',
+                        'Kepala Departemen Kesehatan Lingkungan dan K3',
+                        'Staf Departemen Kesehatan Lingkungan dan K3',
+                    ],
+                    'Keanggotaan' => [
+                        'Anggota BEM',
+                        'Lainnya',
+                    ],
+                ],
+
+                'DPM Universitas Ibnu Sina' => [
+                    'Pimpinan DPM' => [
+                        'Ketua DPM',
+                        'Wakil Ketua DPM',
+                        'Sekretaris DPM',
+                        'Bendahara DPM',
+                    ],
+                    'Komisi DPM' => [
+                        'Ketua Komisi I',
+                        'Anggota Komisi I',
+                        'Ketua Komisi II',
+                        'Anggota Komisi II',
+                        'Ketua Komisi III',
+                        'Anggota Komisi III',
+                        'Ketua Komisi IV',
+                        'Anggota Komisi IV',
+                    ],
+                    'Keanggotaan' => [
+                        'Anggota DPM',
+                        'Lainnya',
+                    ],
+                ],
+
+                'HMTI - Teknik Informatika' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris Jenderal',
+                        'Sekretaris I',
+                        'Sekretaris II',
+                        'Bendahara I',
+                        'Bendahara II',
+                    ],
+                    'Departemen' => [
+                        'Kepala Departemen LITBANG',
+                        'Kepala Departemen Program',
+                        'Kepala Departemen Hubungan Masyarakat (HUMAS)',
+                        'Kepala Departemen Media',
+                        'Anggota Departemen',
+                    ],
+                    'Keanggotaan' => ['Anggota HMTI', 'Lainnya'],
+                ],
+
+                'HIMASI - Sistem Informasi' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Departemen' => [
+                        'Kepala Departemen Media',
+                        'Kepala Departemen Humas',
+                        'Kepala Departemen LITBANG',
+                        'Anggota Departemen',
+                    ],
+                    'Keanggotaan' => ['Anggota HIMASI', 'Lainnya'],
+                ],
+
+                'HIMATRI - Teknik Industri' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris I',
+                        'Sekretaris II',
+                        'Bendahara',
+                    ],
+                    'Divisi' => [
+                        'Kepala Divisi LITBANG',
+                        'Kepala Divisi HUMAS',
+                        'Kepala Divisi MEDKOM',
+                        'Kepala Divisi Kewirausahaan',
+                        'Anggota Divisi',
+                    ],
+                    'Keanggotaan' => ['Anggota HIMATRI', 'Lainnya'],
+                ],
+
+                'HIMANISTIK - Teknik Logistik' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua I',
+                        'Wakil Ketua II',
+                        'Sekretaris Umum',
+                        'Bendahara I',
+                        'Bendahara II',
+                    ],
+                    'Departemen' => [
+                        'Koordinator Departemen Hubungan Masyarakat',
+                        'Koordinator Departemen Media',
+                        'Koordinator Departemen Kewirausahaan',
+                        'Anggota Departemen',
+                    ],
+                    'Keanggotaan' => ['Anggota HIMANISTIK', 'Lainnya'],
+                ],
+
+                'HMTP - Teknik Perkapalan' => [
+                    'Pengurus Inti' => [
+                        'Ketua Umum',
+                        'Wakil Ketua Umum',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Divisi' => [
+                        'Kepala Divisi Media dan Informasi',
+                        'Kepala Divisi HUMAS',
+                        'Kepala Divisi Pendidikan dan Pengembangan',
+                        'Kepala Divisi PSDM',
+                        'Anggota Divisi',
+                    ],
+                    'Keanggotaan' => ['Anggota HMTP', 'Lainnya'],
+                ],
+
+                'HMM - Manajemen' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Departemen' => [
+                        'Ketua Departemen Agama',
+                        'Ketua Departemen Kominfo',
+                        'Ketua Departemen Kewirausahaan',
+                        'Ketua Departemen Humas',
+                        'Anggota Departemen',
+                    ],
+                    'Keanggotaan' => ['Anggota HMM', 'Lainnya'],
+                ],
+
+                'HMA - Akuntansi' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris I',
+                        'Sekretaris II',
+                        'Bendahara I',
+                        'Bendahara II',
+                    ],
+                    'Divisi' => [
+                        'Ketua Divisi Akademik',
+                        'Ketua Divisi Kewirausahaan',
+                        'Ketua Divisi Informasi dan Teknologi',
+                        'Ketua Divisi Hubungan Masyarakat dan Antar Lembaga',
+                        'Anggota Divisi',
+                    ],
+                    'Keanggotaan' => ['Anggota HMA', 'Lainnya'],
+                ],
+
+                'HIMA K3 - Kesehatan & Keselamatan Kerja' => [
+                    'Pengurus Inti' => [
+                        'Ketua HIMA',
+                        'Wakil Ketua HIMA',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Divisi' => [
+                        'Koordinator Divisi Promkes K3',
+                        'Koordinator Divisi Humas',
+                        'Koordinator Divisi Media',
+                        'Anggota Divisi',
+                    ],
+                    'Keanggotaan' => ['Anggota HIMA K3', 'Lainnya'],
+                ],
+
+                'HMKL - Kesehatan Lingkungan' => [
+                    'Pengurus Inti' => [
+                        'Ketua HIMA KL',
+                        'Wakil Ketua HIMA KL',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Bidang & PIC' => [
+                        'Kepala Bidang Humas',
+                        'PIC Internal',
+                        'PIC Eksternal',
+                        'Kepala Bidang PSDM',
+                        'Kepala Bidang Program',
+                        'Kepala Bidang MEDKOM',
+                        'PIC Publikasi dan Dokumentasi',
+                        'PIC Design',
+                        'Anggota Bidang',
+                    ],
+                    'Keanggotaan' => ['Anggota HMKL', 'Lainnya'],
+                ],
+
+                'HIMA KESMAS - Kesehatan Masyarakat' => [
+                    'Pengurus Inti' => [
+                        'Ketua HIMA Kesmas',
+                        'Wakil Ketua HIMA Kesmas',
+                        'Sekretaris',
+                        'Anggota Sekretariat',
+                        'Bendahara',
+                        'Anggota Bendahara',
+                    ],
+                    'Bidang' => [
+                        'Koordinator Bidang Akademik dan Riset',
+                        'Koordinator Bidang Humas dan Jejaring',
+                        'Koordinator Bidang Sosial dan Pengabdian Masyarakat',
+                        'Koordinator Bidang Media dan Dokumentasi',
+                        'Anggota Bidang',
+                    ],
+                    'Keanggotaan' => ['Anggota HIMA KESMAS', 'Lainnya'],
+                ],
+
+                'UKM SiPena' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Pimpinan Redaksi',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Redaksi & Anggota' => [
+                        'Redaktur / Wartawan Mahasiswa',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Mapala Ibnu Sina (MAPAIS)' => [
+                    'Pengurus Inti' => [
+                        'Ketua Umum',
+                        'Wakil Ketua Umum',
+                        'Sekretaris I',
+                        'Sekretaris II',
+                        'Bendahara I',
+                        'Bendahara II',
+                        'Humas I',
+                        'Humas II',
+                        'Humas III',
+                    ],
+                    'Divisi' => [
+                        'Koordinator Divisi Lingkungan Hidup',
+                        'Anggota Divisi Lingkungan Hidup',
+                        'Koordinator Divisi Hutan Rimba',
+                        'Anggota Divisi Hutan Rimba',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Atletik' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Sekretaris II',
+                        'Bendahara',
+                        'Humas I',
+                        'Humas II',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Badminton' => [
+                    'Pengurus Inti' => [
+                        'Ketua Umum',
+                        'Wakil Ketua Umum',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Divisi' => [
+                        'Koordinator Divisi Media dan Dokumentasi',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM English Club' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Bendahara',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM FORSI' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Departemen' => [
+                        'Kepala Departemen Kaderisasi',
+                        'Anggota Departemen Kaderisasi',
+                        'Kepala Departemen Syiar dan Dakwah',
+                        'Anggota Departemen Syiar dan Dakwah',
+                        'Kepala Departemen Humas',
+                        'Anggota Departemen Humas',
+                        'Kepala Departemen Kemuslimahan',
+                        'Anggota Departemen Kemuslimahan',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Futsal' => [
+                    'Pengurus Inti' => [
+                        'Ketua Umum',
+                        'Wakil Ketua Umum',
+                        'Sekretaris',
+                        'Bendahara',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Sanggar Tari Rossa Primula' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Wakil Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Divisi' => [
+                        'Koordinator Kegiatan',
+                        'Personel Divisi Kegiatan',
+                        'Koordinator Humas',
+                        'Personel Divisi Humas',
+                        'Koordinator Perkap',
+                        'Personel Divisi Perkap',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM PUSWIRA' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Departemen' => [
+                        'Kepala Departemen Humas',
+                        'Personel Departemen Humas',
+                        'Kepala Departemen Multimedia',
+                        'Personel Departemen Multimedia',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Pencak Silat' => [
+                    'Pengurus Inti' => [
+                        'Ketua Umum',
+                        'Wakil Ketua Umum',
+                        'Sekretaris',
+                        'Bendahara I',
+                        'Bendahara II',
+                    ],
+                    'Bidang' => [
+                        'Anggota Bidang Organisasi dan Humas',
+                        'Anggota Bidang Promosi dan Pemasaran (Media)',
+                        'Anggota Bidang Perlengkapan',
+                        'Anggota Bidang Kaderisasi dan Keanggotaan',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Perkusi (Seni Musik)' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Wakil Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Departemen' => [
+                        'Koordinator Departemen Humas',
+                        'Anggota Departemen Humas',
+                        'Koordinator Departemen Multimedia',
+                        'Anggota Departemen Multimedia',
+                        'Koordinator Departemen Seni',
+                        'Anggota Departemen Seni',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM PERKUSI (Komputer)' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Divisi' => [
+                        'Koordinator Divisi IT & Jaringan',
+                        'Koordinator Divisi Software / Coding',
+                        'Anggota Divisi',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
+
+                'UKM Gerakan Pramuka Racana' => [
+                    'Pengurus Inti' => [
+                        'Ketua Dewan Racana (KDR)',
+                        'Pemangku Adat',
+                        'Kerani (Sekretaris)',
+                        'Bendahara',
+                        'Anggota Racana',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
             ],
         ];
     }
@@ -103,10 +647,11 @@ class AuthController extends Controller
         }
         $master = self::getMasterAcademicAndOrgData();
         return view('layouts.auth.register', [
-            'fakultas'   => $master['fakultas'],
-            'prodis'     => $master['prodis'],
-            'organisasi' => $master['organisasi'],
-            'jabatan'    => $master['jabatan'],
+            'fakultas'       => $master['fakultas'],
+            'prodis'         => $master['prodis'],
+            'organisasi'     => $master['organisasi'],
+            'jabatan'        => $master['jabatan'],
+            'jabatan_by_org' => $master['jabatan_by_org'],
         ]);
     }
 
@@ -121,6 +666,7 @@ class AuthController extends Controller
             'program_studi' => 'nullable|string|max:255',
             'organisasi'    => 'nullable',
             'jabatan'       => 'nullable|string|max:255',
+            'jabatan_custom'=> 'nullable|string|max:255',
         ], [
             'name.required'      => 'Nama lengkap wajib diisi.',
             'email.required'     => 'Alamat email wajib diisi.',
@@ -140,16 +686,22 @@ class AuthController extends Controller
             }
         }
 
+        // Tentukan jabatan: jika memilih 'Lainnya' dan mengisi jabatan_custom, gunakan custom
+        $jabatanVal = $request->filled('jabatan') ? trim($request->jabatan) : null;
+        if (($jabatanVal === 'Lainnya' || empty($jabatanVal)) && $request->filled('jabatan_custom')) {
+            $jabatanVal = trim($request->jabatan_custom);
+        }
+
         $user = User::create([
             'name'          => trim($request->name),
             'email'         => strtolower(trim($request->email)),
             'password'      => Hash::make($request->password),
-            'role'          => 'mahasiswa', // Default Role Mahasiswa
+            'role'          => 'mahasiswa',
             'nim'           => $request->filled('nim') ? trim($request->nim) : null,
             'fakultas'      => $request->filled('fakultas') ? trim($request->fakultas) : null,
             'program_studi' => $request->filled('program_studi') ? trim($request->program_studi) : null,
             'organisasi'    => !empty($organisasiVal) ? $organisasiVal : null,
-            'jabatan'       => $request->filled('jabatan') ? trim($request->jabatan) : null,
+            'jabatan'       => $jabatanVal,
             'is_active'     => true,
         ]);
 
@@ -165,26 +717,27 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             if (!$user->is_active) {
                 Auth::logout();
-                return redirect()->back()
-                    ->withInput($request->only('email', 'remember'))
-                    ->withErrors(['email' => 'Akun Anda dinonaktifkan. Silakan hubungi administrator.']);
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Akun Anda saat ini dinonaktifkan. Silakan hubungi Administrator.',
+                ])->onlyInput('email');
             }
 
-            $request->session()->regenerate();
-
-            return redirect()->intended(route('dashboard.index'))
-                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
+            return redirect()->intended(route('dashboard.index'));
         }
 
-        return redirect()->back()
-            ->withInput($request->only('email', 'remember'))
-            ->withErrors([
-                'email' => 'Email atau password yang Anda masukkan salah.',
-            ]);
+        return back()->withErrors([
+            'email' => 'Email atau password yang Anda masukkan salah.',
+        ])->onlyInput('email');
     }
 
     public function logout(Request $request)
@@ -194,13 +747,17 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')
-            ->with('success', 'Anda telah berhasil keluar.');
+        return redirect()->route('login');
     }
 
     public function editPassword()
     {
-        return view('pages.users.change-password');
+        return view('pages.auth.change-password');
+    }
+
+    public function showChangePasswordForm()
+    {
+        return view('pages.auth.change-password');
     }
 
     public function updatePassword(Request $request)
@@ -228,15 +785,16 @@ class AuthController extends Controller
     public function profile()
     {
         $user = Auth::user();
-        $logoProdi = \App\Models\LogoProdi::getForProdi($user->program_studi);
+        $logoProdi = \App\Models\LogoProdi::getForUser($user);
         $master = self::getMasterAcademicAndOrgData();
         return view('pages.users.profile', [
-            'user'       => $user,
-            'logoProdi'  => $logoProdi,
-            'fakultas'   => $master['fakultas'],
-            'prodis'     => $master['prodis'],
-            'organisasi' => $master['organisasi'],
-            'jabatan'    => $master['jabatan'],
+            'user'           => $user,
+            'logoProdi'      => $logoProdi,
+            'fakultas'       => $master['fakultas'],
+            'prodis'         => $master['prodis'],
+            'organisasi'     => $master['organisasi'],
+            'jabatan'        => $master['jabatan'],
+            'jabatan_by_org' => $master['jabatan_by_org'],
         ]);
     }
 
@@ -246,14 +804,15 @@ class AuthController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'nim'           => ['nullable', 'string', 'max:50'],
-            'fakultas'      => ['nullable', 'string', 'max:255'],
-            'program_studi' => ['nullable', 'string', 'max:255'],
-            'organisasi'    => ['nullable'],
-            'jabatan'       => ['nullable', 'string', 'max:255'],
-            'photo_profile' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'name'           => ['required', 'string', 'max:255'],
+            'email'          => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'nim'            => ['nullable', 'string', 'max:50'],
+            'fakultas'       => ['nullable', 'string', 'max:255'],
+            'program_studi'  => ['nullable', 'string', 'max:255'],
+            'organisasi'     => ['nullable'],
+            'jabatan'        => ['nullable', 'string', 'max:255'],
+            'jabatan_custom' => ['nullable', 'string', 'max:255'],
+            'photo_profile'  => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'name.required'         => 'Nama lengkap wajib diisi.',
             'email.required'        => 'Alamat email wajib diisi.',
@@ -274,6 +833,12 @@ class AuthController extends Controller
             $validated['organisasi'] = null;
         }
 
+        // Tentukan jabatan
+        if ($request->filled('jabatan_custom') && ($request->input('jabatan') === 'Lainnya' || empty($request->input('jabatan')))) {
+            $validated['jabatan'] = trim($request->input('jabatan_custom'));
+        }
+        unset($validated['jabatan_custom']);
+
         if ($request->boolean('remove_photo')) {
             if ($user->photo_profile && Storage::disk('public')->exists($user->photo_profile)) {
                 Storage::disk('public')->delete($user->photo_profile);
@@ -293,4 +858,3 @@ class AuthController extends Controller
         return redirect()->back()->with('success', 'Profil Anda berhasil diperbarui.');
     }
 }
-

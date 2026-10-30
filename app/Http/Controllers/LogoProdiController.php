@@ -10,12 +10,19 @@ use Illuminate\Support\Facades\Storage;
 class LogoProdiController extends Controller
 {
     /**
-     * Daftar program studi & fakultas bawaan UIS.
+     * Master data kategori, program studi & fakultas bawaan UIS.
      */
     protected function getMasterData(): array
     {
         return [
+            'kategori' => [
+                'Himpunan Mahasiswa (HIMA)'        => 'Himpunan Mahasiswa Jurusan (HIMA)',
+                'Lembaga Mahasiswa (BEM / DPM)'    => 'Lembaga Mahasiswa (BEM / DPM Universitas)',
+                'Unit Kegiatan Mahasiswa (UKM)'    => 'Unit Kegiatan Mahasiswa (UKM)',
+                'Lembaga Fakultas'                 => 'Lembaga Tingkat Fakultas (BEM-F / DPM-F)',
+            ],
             'prodis' => [
+                'Semua Program Studi (Tingkat Universitas)' => 'Semua Program Studi (Tingkat Universitas)',
                 'S1 - Teknik Informatika'              => 'S1 - Teknik Informatika',
                 'S1 - Sistem Informasi'                => 'S1 - Sistem Informasi',
                 'S1 - Teknik Industri'                 => 'S1 - Teknik Industri',
@@ -30,6 +37,7 @@ class LogoProdiController extends Controller
                 'S2 - Magister Kesehatan Masyarakat'   => 'S2 - Magister Kesehatan Masyarakat',
             ],
             'fakultas' => [
+                'Tingkat Universitas'                   => 'Tingkat Universitas (Lintas Fakultas)',
                 'Fakultas Sains dan Teknologi'          => 'Fakultas Sains dan Teknologi',
                 'Fakultas Ekonomi dan Bisnis'           => 'Fakultas Ekonomi dan Bisnis',
                 'Fakultas Ilmu Kesehatan'               => 'Fakultas Ilmu Kesehatan',
@@ -53,6 +61,7 @@ class LogoProdiController extends Controller
     {
         $master = $this->getMasterData();
         return view('pages.logo-prodi.create', [
+            'kategori' => $master['kategori'],
             'prodis'   => $master['prodis'],
             'fakultas' => $master['fakultas'],
         ]);
@@ -64,20 +73,32 @@ class LogoProdiController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'program_studi'   => ['required', 'string', 'max:255'],
+            'kategori'        => ['required', 'string', 'max:255'],
+            'program_studi'   => ['nullable', 'string', 'max:255'],
             'fakultas'        => ['nullable', 'string', 'max:255'],
-            'nama_organisasi' => ['nullable', 'string', 'max:255'],
+            'nama_organisasi' => ['required', 'string', 'max:255'],
             'singkatan'       => ['nullable', 'string', 'max:50'],
             'logo'            => ['required', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
             'keterangan'      => ['nullable', 'string', 'max:1000'],
             'is_active'       => ['nullable', 'boolean'],
         ], [
-            'program_studi.required' => 'Program Studi wajib dipilih/diisi.',
-            'logo.required'          => 'File logo wajib diunggah.',
-            'logo.image'             => 'File harus berupa gambar.',
-            'logo.mimes'             => 'Format file harus berupa PNG, JPG, JPEG, WEBP, atau SVG.',
-            'logo.max'               => 'Ukuran file logo maksimal 2 MB.',
+            'kategori.required'        => 'Kategori organisasi wajib dipilih.',
+            'nama_organisasi.required' => 'Nama organisasi / hima / lembaga wajib diisi.',
+            'logo.required'            => 'File logo wajib diunggah.',
+            'logo.image'               => 'File harus berupa gambar.',
+            'logo.mimes'               => 'Format file harus berupa PNG, JPG, JPEG, WEBP, atau SVG.',
+            'logo.max'                 => 'Ukuran file logo maksimal 2 MB.',
         ]);
+
+        // Default prodi & fakultas untuk Lembaga / UKM jika dikosongkan
+        if (in_array($validated['kategori'], ['Lembaga Mahasiswa (BEM / DPM)', 'Unit Kegiatan Mahasiswa (UKM)'])) {
+            if (empty($validated['fakultas'])) {
+                $validated['fakultas'] = 'Tingkat Universitas';
+            }
+            if (empty($validated['program_studi'])) {
+                $validated['program_studi'] = 'Semua Program Studi (Tingkat Universitas)';
+            }
+        }
 
         $file = $request->file('logo');
         $fileName = 'logo_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
@@ -87,7 +108,7 @@ class LogoProdiController extends Controller
         LogoProdi::create($validated);
 
         return redirect()->route('logo-prodi.index')
-            ->with('success', 'Logo Program Studi berhasil ditambahkan.');
+            ->with('success', 'Logo Organisasi / Program Studi berhasil ditambahkan.');
     }
 
     /**
@@ -98,6 +119,7 @@ class LogoProdiController extends Controller
         $master = $this->getMasterData();
         return view('pages.logo-prodi.edit', [
             'logoProdi' => $logoProdi,
+            'kategori'  => $master['kategori'],
             'prodis'    => $master['prodis'],
             'fakultas'  => $master['fakultas'],
         ]);
@@ -109,19 +131,30 @@ class LogoProdiController extends Controller
     public function update(Request $request, LogoProdi $logoProdi)
     {
         $validated = $request->validate([
-            'program_studi'   => ['required', 'string', 'max:255'],
+            'kategori'        => ['required', 'string', 'max:255'],
+            'program_studi'   => ['nullable', 'string', 'max:255'],
             'fakultas'        => ['nullable', 'string', 'max:255'],
-            'nama_organisasi' => ['nullable', 'string', 'max:255'],
+            'nama_organisasi' => ['required', 'string', 'max:255'],
             'singkatan'       => ['nullable', 'string', 'max:50'],
             'logo'            => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
             'keterangan'      => ['nullable', 'string', 'max:1000'],
             'is_active'       => ['nullable', 'boolean'],
         ], [
-            'program_studi.required' => 'Program Studi wajib dipilih/diisi.',
-            'logo.image'             => 'File harus berupa gambar.',
-            'logo.mimes'             => 'Format file harus berupa PNG, JPG, JPEG, WEBP, atau SVG.',
-            'logo.max'               => 'Ukuran file logo maksimal 2 MB.',
+            'kategori.required'        => 'Kategori organisasi wajib dipilih.',
+            'nama_organisasi.required' => 'Nama organisasi / hima / lembaga wajib diisi.',
+            'logo.image'               => 'File harus berupa gambar.',
+            'logo.mimes'               => 'Format file harus berupa PNG, JPG, JPEG, WEBP, atau SVG.',
+            'logo.max'                 => 'Ukuran file logo maksimal 2 MB.',
         ]);
+
+        if (in_array($validated['kategori'], ['Lembaga Mahasiswa (BEM / DPM)', 'Unit Kegiatan Mahasiswa (UKM)'])) {
+            if (empty($validated['fakultas'])) {
+                $validated['fakultas'] = 'Tingkat Universitas';
+            }
+            if (empty($validated['program_studi'])) {
+                $validated['program_studi'] = 'Semua Program Studi (Tingkat Universitas)';
+            }
+        }
 
         if ($request->hasFile('logo')) {
             // Hapus logo lama jika ada
@@ -140,7 +173,7 @@ class LogoProdiController extends Controller
         $logoProdi->update($validated);
 
         return redirect()->route('logo-prodi.index')
-            ->with('success', 'Logo Program Studi berhasil diperbarui.');
+            ->with('success', 'Logo Organisasi / Program Studi berhasil diperbarui.');
     }
 
     /**
@@ -155,10 +188,10 @@ class LogoProdiController extends Controller
         $logoProdi->delete();
 
         if ($request->ajax()) {
-            return response()->json(['success' => true, 'message' => 'Logo Program Studi berhasil dihapus.']);
+            return response()->json(['success' => true, 'message' => 'Logo Organisasi / Program Studi berhasil dihapus.']);
         }
 
         return redirect()->route('logo-prodi.index')
-            ->with('success', 'Logo Program Studi berhasil dihapus.');
+            ->with('success', 'Logo Organisasi / Program Studi berhasil dihapus.');
     }
 }

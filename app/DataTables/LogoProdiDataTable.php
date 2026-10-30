@@ -25,17 +25,21 @@ class LogoProdiDataTable extends DataTable
                     <img src="' . e($row->logo_url) . '" alt="Logo" class="img-fluid" style="max-height: 42px; object-fit: contain;">
                 </div>';
             })
+            ->addColumn('kategori_badge', function (LogoProdi $row) {
+                return $row->kategori_badge;
+            })
+            ->addColumn('organisasi', function (LogoProdi $row) {
+                $singkatan = $row->singkatan ? '<span class="badge bg-dark me-1">' . e($row->singkatan) . '</span>' : '';
+                $nama = $row->nama_organisasi ? e($row->nama_organisasi) : '<span class="text-muted fst-italic">-</span>';
+                return '<div>' . $singkatan . '<span class="fw-semibold text-dark">' . $nama . '</span></div>';
+            })
             ->editColumn('program_studi', function (LogoProdi $row) {
-                $html = '<div class="fw-bold text-dark">' . e($row->program_studi) . '</div>';
+                $prodi = $row->program_studi ?: 'Semua Prodi (Lintas Fakultas)';
+                $html = '<div class="fw-bold text-dark">' . e($prodi) . '</div>';
                 if (!empty($row->fakultas)) {
                     $html .= '<small class="text-muted"><i class="bi bi-buildings me-1"></i>' . e($row->fakultas) . '</small>';
                 }
                 return $html;
-            })
-            ->addColumn('organisasi', function (LogoProdi $row) {
-                $singkatan = $row->singkatan ? '<span class="badge bg-primary me-1">' . e($row->singkatan) . '</span>' : '';
-                $nama = $row->nama_organisasi ? e($row->nama_organisasi) : '<span class="text-muted fst-italic">-</span>';
-                return '<div>' . $singkatan . '<span class="fw-semibold text-dark">' . $nama . '</span></div>';
             })
             ->editColumn('is_active', function (LogoProdi $row) {
                 if ($row->is_active) {
@@ -49,7 +53,7 @@ class LogoProdiDataTable extends DataTable
                 $csrf = csrf_field();
                 $method = method_field('DELETE');
 
-                $btnEdit = '<a href="' . $editUrl . '" class="btn-action btn-action-edit" title="Edit Logo Prodi">
+                $btnEdit = '<a href="' . $editUrl . '" class="btn-action btn-action-edit" title="Edit Logo">
                                 <i class="bi bi-pencil-square"></i>
                             </a>';
 
@@ -57,14 +61,14 @@ class LogoProdiDataTable extends DataTable
                     <form action="' . $deleteUrl . '" method="POST" class="d-inline m-0 p-0 delete-form">
                         ' . $csrf . '
                         ' . $method . '
-                        <button type="button" class="btn-action btn-action-delete btn-delete" data-id="' . $row->id . '" title="Hapus Logo Prodi">
+                        <button type="button" class="btn-action btn-action-delete btn-delete" data-id="' . $row->id . '" title="Hapus Logo">
                             <i class="bi bi-trash"></i>
                         </button>
                     </form>';
 
                 return '<div class="action-btn-group" role="group">' . $btnEdit . $btnDelete . '</div>';
             })
-            ->rawColumns(['logo_preview', 'program_studi', 'organisasi', 'is_active', 'action'])
+            ->rawColumns(['logo_preview', 'kategori_badge', 'organisasi', 'program_studi', 'is_active', 'action'])
             ->setRowId('id');
     }
 
@@ -75,7 +79,7 @@ class LogoProdiDataTable extends DataTable
      */
     public function query(LogoProdi $model): QueryBuilder
     {
-        return $model->newQuery()->orderBy('program_studi', 'asc');
+        return $model->newQuery()->orderBy('kategori', 'asc')->orderBy('nama_organisasi', 'asc');
     }
 
     /**
@@ -87,13 +91,13 @@ class LogoProdiDataTable extends DataTable
                     ->setTableId('logo-prodi-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
-                    ->orderBy(1)
+                    ->orderBy(2)
                     ->parameters([
                         'scrollX' => true,
                         'language' => [
                             'search' => 'Cari:',
                             'lengthMenu' => 'Tampilkan _MENU_ data per halaman',
-                            'zeroRecords' => 'Data logo prodi tidak ditemukan',
+                            'zeroRecords' => 'Data logo organisasi tidak ditemukan',
                             'info' => 'Menampilkan _START_ - _END_ dari _TOTAL_ data',
                             'infoEmpty' => 'Tidak ada data tersedia',
                             'paginate' => [
@@ -113,15 +117,16 @@ class LogoProdiDataTable extends DataTable
     {
         return [
             Column::make('DT_RowIndex')->title('No')->orderable(false)->searchable(false)->width(40)->addClass('text-center'),
-            Column::computed('logo_preview')->title('Logo')->orderable(false)->searchable(false)->width(70)->addClass('text-center'),
-            Column::make('program_studi')->title('Program Studi'),
-            Column::computed('organisasi')->title('Organisasi / Singkatan'),
-            Column::make('is_active')->title('Status')->width(90)->addClass('text-center'),
+            Column::computed('logo_preview')->title('Logo')->orderable(false)->searchable(false)->width(65)->addClass('text-center'),
+            Column::computed('kategori_badge')->title('Kategori')->width(140),
+            Column::computed('organisasi')->title('Nama Organisasi & Singkatan'),
+            Column::make('program_studi')->title('Program Studi & Fakultas'),
+            Column::make('is_active')->title('Status')->width(85)->addClass('text-center'),
             Column::computed('action')
                   ->title('Aksi')
                   ->exportable(false)
                   ->printable(false)
-                  ->width(110)
+                  ->width(100)
                   ->addClass('text-center'),
         ];
     }
@@ -131,6 +136,6 @@ class LogoProdiDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'LogoProdi_' . date('YmdHis');
+        return 'LogoOrganisasiProdi_' . date('YmdHis');
     }
 }

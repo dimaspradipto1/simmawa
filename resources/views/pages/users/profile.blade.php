@@ -285,15 +285,26 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="jabatan" class="form-label">Jabatan di Organisasi</label>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label for="jabatan" class="form-label mb-0">Jabatan di Organisasi</label>
+                                            <span id="prof-jabatan-context-hint" class="small text-muted" style="font-size: 0.75rem;">Sesuai SK Pengurus 2026-2027</span>
+                                        </div>
                                         <select class="form-select @error('jabatan') is-invalid @enderror" id="jabatan" name="jabatan">
                                             <option value="">-- Pilih Jabatan / Posisi --</option>
                                             @if(isset($jabatan))
-                                                @foreach($jabatan as $jKey => $jLabel)
-                                                    <option value="{{ $jKey }}" {{ old('jabatan', $user->jabatan) == $jKey ? 'selected' : '' }}>{{ $jLabel }}</option>
+                                                @foreach($jabatan as $groupLabel => $items)
+                                                    <optgroup label="{{ $groupLabel }}">
+                                                        @foreach($items as $val => $text)
+                                                            <option value="{{ $val }}" {{ old('jabatan', $user->jabatan) == $val ? 'selected' : '' }}>{{ $text }}</option>
+                                                        @endforeach
+                                                    </optgroup>
                                                 @endforeach
                                             @endif
                                         </select>
+                                        <div id="prof-wrapper-jabatan-custom" class="mt-2" style="display: {{ old('jabatan', $user->jabatan) === 'Lainnya' ? 'block' : 'none' }};">
+                                            <input type="text" name="jabatan_custom" id="prof_jabatan_custom" class="form-control form-control-sm" placeholder="Ketik jabatan / departemen spesifik..." value="{{ old('jabatan_custom') }}">
+                                            <span class="form-text small text-muted" style="font-size: 0.74rem;">Contoh: <em>Kepala Departemen Advokasi dan Kajian Hukum</em> atau <em>Pimpinan Redaksi</em></span>
+                                        </div>
                                         @error('jabatan')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -376,9 +387,9 @@
                                             <!-- Top Header: Logo Prodi / BEM Emblem & Title -->
                                             <div class="kta-bem-header">
                                                 @if(isset($logoProdi) && $logoProdi)
-                                                    <img src="{{ $logoProdi->logo_url }}" alt="{{ $logoProdi->program_studi }}" class="kta-bem-logo" style="object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+                                                    <img src="{{ $logoProdi->logo_url }}" alt="{{ $logoProdi->nama_organisasi ?? $logoProdi->program_studi }}" class="kta-bem-logo" style="object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
                                                     <div class="kta-bem-title">
-                                                        <span class="kta-bem-big">{{ $logoProdi->singkatan ?? 'HIMA' }}</span>
+                                                        <span class="kta-bem-big">{{ $logoProdi->singkatan ?? 'ORMAWA' }}</span>
                                                         <span class="kta-bem-sub">{{ $logoProdi->nama_organisasi ?? $logoProdi->program_studi }}</span>
                                                         <span class="kta-bem-sub">UNIVERSITAS IBNU SINA</span>
                                                     </div>
@@ -1017,6 +1028,127 @@
                 }
 
                 updateProfOrgDisplay();
+
+                // Dynamic Jabatan Options Logic for Profile (SK 2026-2027)
+                const JABATAN_BY_ORG = @json($jabatan_by_org ?? []);
+                const JABATAN_GENERAL = @json($jabatan ?? []);
+                const profJabatanSelect = document.getElementById('jabatan');
+                const profJabatanCustomWrapper = document.getElementById('prof-wrapper-jabatan-custom');
+                const profJabatanCustomInput = document.getElementById('prof_jabatan_custom');
+                const profJabatanHint = document.getElementById('prof-jabatan-context-hint');
+                const userCurrentJabatan = "{{ old('jabatan', $user->jabatan ?? '') }}";
+
+                function updateProfJabatanOptions() {
+                    if (!profJabatanSelect) return;
+
+                    const checkedBoxes = Array.from(document.querySelectorAll('.prof-org-item-checkbox:checked'));
+                    const checkedValues = checkedBoxes.map(cb => cb.value);
+
+                    let matchingGroups = {};
+                    let hasOrgMatch = false;
+
+                    checkedValues.forEach(orgKey => {
+                        if (JABATAN_BY_ORG[orgKey]) {
+                            hasOrgMatch = true;
+                            matchingGroups[orgKey] = JABATAN_BY_ORG[orgKey];
+                        }
+                    });
+
+                    const currentVal = profJabatanSelect.value || userCurrentJabatan;
+                    profJabatanSelect.innerHTML = '<option value="">-- Pilih Jabatan / Posisi --</option>';
+
+                    if (hasOrgMatch) {
+                        if (profJabatanHint) {
+                            profJabatanHint.innerHTML = '<span class="text-success fw-semibold"><i class="bi bi-shield-check me-1"></i>Sesuai SK Pengurus 2026-2027</span>';
+                        }
+
+                        for (const [orgName, groups] of Object.entries(matchingGroups)) {
+                            const shortOrgName = orgName.split(' - ')[0].replace('Universitas Ibnu Sina', 'UIS').trim();
+                            for (const [groupName, items] of Object.entries(groups)) {
+                                const optgroup = document.createElement('optgroup');
+                                optgroup.label = `${shortOrgName} • ${groupName}`;
+                                items.forEach(item => {
+                                    const opt = document.createElement('option');
+                                    opt.value = item;
+                                    opt.textContent = item;
+                                    if (item === currentVal) {
+                                        opt.selected = true;
+                                    }
+                                    optgroup.appendChild(opt);
+                                });
+                                profJabatanSelect.appendChild(optgroup);
+                            }
+                        }
+                    } else {
+                        if (profJabatanHint) {
+                            profJabatanHint.textContent = 'Pilihan Jabatan Standar';
+                        }
+                        for (const [groupName, items] of Object.entries(JABATAN_GENERAL)) {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = groupName;
+                            for (const [val, label] of Object.entries(items)) {
+                                const opt = document.createElement('option');
+                                opt.value = val;
+                                opt.textContent = label;
+                                if (val === currentVal) {
+                                    opt.selected = true;
+                                }
+                                optgroup.appendChild(opt);
+                            }
+                            profJabatanSelect.appendChild(optgroup);
+                        }
+                    }
+
+                    // Selalu tambahkan opsi Lainnya
+                    const hasLainnya = Array.from(profJabatanSelect.options).some(o => o.value === 'Lainnya');
+                    if (!hasLainnya) {
+                        const optLainnya = document.createElement('option');
+                        optLainnya.value = 'Lainnya';
+                        optLainnya.textContent = 'Lainnya (Ketik Manual)...';
+                        if (currentVal === 'Lainnya') {
+                            optLainnya.selected = true;
+                        }
+                        profJabatanSelect.appendChild(optLainnya);
+                    }
+
+                    // Pertahankan jika user memiliki jabatan custom
+                    if (currentVal && currentVal !== 'Lainnya' && !Array.from(profJabatanSelect.options).some(o => o.value === currentVal)) {
+                        const customOpt = document.createElement('option');
+                        customOpt.value = currentVal;
+                        customOpt.textContent = currentVal;
+                        customOpt.selected = true;
+                        profJabatanSelect.insertBefore(customOpt, profJabatanSelect.lastElementChild);
+                    }
+
+                    checkProfCustomJabatan();
+                }
+
+                function checkProfCustomJabatan() {
+                    if (!profJabatanSelect || !profJabatanCustomWrapper) return;
+                    if (profJabatanSelect.value === 'Lainnya') {
+                        profJabatanCustomWrapper.style.display = 'block';
+                        if (profJabatanCustomInput && !profJabatanCustomInput.value) {
+                            profJabatanCustomInput.focus();
+                        }
+                    } else {
+                        profJabatanCustomWrapper.style.display = 'none';
+                    }
+                }
+
+                if (profJabatanSelect) {
+                    profJabatanSelect.addEventListener('change', checkProfCustomJabatan);
+                }
+
+                profOrgCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', updateProfJabatanOptions);
+                });
+                if (btnResetProfOrg) {
+                    btnResetProfOrg.addEventListener('click', function() {
+                        setTimeout(updateProfJabatanOptions, 10);
+                    });
+                }
+
+                updateProfJabatanOptions();
             }
         });
 

@@ -111,7 +111,7 @@
       <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('logo-prodi.*') ? '' : 'collapsed' }}" href="{{ route('logo-prodi.index') }}">
           <i class="bi bi-patch-check"></i>
-          <span>Logo Program Studi</span>
+          <span>Logo Ormawa & Prodi</span>
         </a>
       </li>
     @endif

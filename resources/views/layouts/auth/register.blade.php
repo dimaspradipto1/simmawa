@@ -946,17 +946,26 @@
 
                             <!-- Jabatan di Organisasi -->
                             <div class="mb-3">
-                                <label for="jabatan" class="form-label">Jabatan di Organisasi</label>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="jabatan" class="form-label mb-0">Jabatan di Organisasi</label>
+                                    <span id="jabatan-context-hint" class="small text-muted" style="font-size: 0.75rem;">Sesuai SK Pengurus 2026-2027</span>
+                                </div>
                                 <div class="input-wrapper">
                                     <span class="input-icon"><i class="bi bi-briefcase"></i></span>
                                     <select name="jabatan" id="jabatan" class="form-input">
                                         <option value="">-- Pilih Jabatan / Posisi --</option>
-                                        @foreach($jabatan as $jKey => $jLabel)
-                                            <option value="{{ $jKey }}" {{ old('jabatan') == $jKey ? 'selected' : '' }}>
-                                                {{ $jLabel }}
-                                            </option>
+                                        @foreach($jabatan as $groupLabel => $items)
+                                            <optgroup label="{{ $groupLabel }}">
+                                                @foreach($items as $val => $text)
+                                                    <option value="{{ $val }}" {{ old('jabatan') == $val ? 'selected' : '' }}>{{ $text }}</option>
+                                                @endforeach
+                                            </optgroup>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div id="wrapper-jabatan-custom" class="mt-2" style="display: {{ old('jabatan') === 'Lainnya' || old('jabatan_custom') ? 'block' : 'none' }};">
+                                    <input type="text" name="jabatan_custom" id="jabatan_custom" class="form-input" style="font-size: 0.85rem;" placeholder="Ketik nama jabatan / departemen spesifik..." value="{{ old('jabatan_custom') }}">
+                                    <span class="form-text small text-muted" style="font-size: 0.74rem;">Contoh: <em>Kepala Departemen Advokasi dan Kajian Hukum</em> atau <em>PIC Publikasi dan Dokumentasi</em></span>
                                 </div>
                             </div>
 
@@ -1288,6 +1297,131 @@
             // Initial display update
             updateOrgDisplay();
         }
+
+        // ==========================================
+        // Dynamic Jabatan Options Logic (SK 2026-2027)
+        // ==========================================
+        const JABATAN_BY_ORG = @json($jabatan_by_org ?? []);
+        const JABATAN_GENERAL = @json($jabatan ?? []);
+        const jabatanSelect = document.getElementById('jabatan');
+        const jabatanCustomWrapper = document.getElementById('wrapper-jabatan-custom');
+        const jabatanCustomInput = document.getElementById('jabatan_custom');
+        const jabatanHint = document.getElementById('jabatan-context-hint');
+        const initialSelectedJabatan = "{{ old('jabatan') }}";
+
+        function updateJabatanOptions() {
+            if (!jabatanSelect) return;
+
+            const checkedBoxes = Array.from(document.querySelectorAll('.org-item-checkbox:checked'));
+            const checkedValues = checkedBoxes.map(cb => cb.value);
+
+            let matchingGroups = {};
+            let hasOrgMatch = false;
+
+            checkedValues.forEach(orgKey => {
+                if (JABATAN_BY_ORG[orgKey]) {
+                    hasOrgMatch = true;
+                    matchingGroups[orgKey] = JABATAN_BY_ORG[orgKey];
+                }
+            });
+
+            const currentVal = jabatanSelect.value || initialSelectedJabatan;
+            jabatanSelect.innerHTML = '<option value="">-- Pilih Jabatan / Posisi --</option>';
+
+            if (hasOrgMatch) {
+                if (jabatanHint) {
+                    jabatanHint.innerHTML = '<span class="text-success fw-semibold"><i class="bi bi-shield-check me-1"></i>Sesuai SK Pengurus 2026-2027</span>';
+                }
+
+                for (const [orgName, groups] of Object.entries(matchingGroups)) {
+                    const shortOrgName = orgName.split(' - ')[0].replace('Universitas Ibnu Sina', 'UIS').trim();
+                    for (const [groupName, items] of Object.entries(groups)) {
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = `${shortOrgName} • ${groupName}`;
+                        items.forEach(item => {
+                            const opt = document.createElement('option');
+                            opt.value = item;
+                            opt.textContent = item;
+                            if (item === currentVal) {
+                                opt.selected = true;
+                            }
+                            optgroup.appendChild(opt);
+                        });
+                        jabatanSelect.appendChild(optgroup);
+                    }
+                }
+            } else {
+                if (jabatanHint) {
+                    jabatanHint.textContent = 'Pilihan Jabatan Standar';
+                }
+                for (const [groupName, items] of Object.entries(JABATAN_GENERAL)) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = groupName;
+                    for (const [val, label] of Object.entries(items)) {
+                        const opt = document.createElement('option');
+                        opt.value = val;
+                        opt.textContent = label;
+                        if (val === currentVal) {
+                            opt.selected = true;
+                        }
+                        optgroup.appendChild(opt);
+                    }
+                    jabatanSelect.appendChild(optgroup);
+                }
+            }
+
+            // Selalu tambahkan opsi Lainnya jika belum ada di dalam select
+            const hasLainnya = Array.from(jabatanSelect.options).some(o => o.value === 'Lainnya');
+            if (!hasLainnya) {
+                const optLainnya = document.createElement('option');
+                optLainnya.value = 'Lainnya';
+                optLainnya.textContent = 'Lainnya (Ketik Manual)...';
+                if (currentVal === 'Lainnya') {
+                    optLainnya.selected = true;
+                }
+                jabatanSelect.appendChild(optLainnya);
+            }
+
+            // Jika nilai yang tersimpan sebelumnya adalah custom text yang bukan dari daftar, pertahankan
+            if (currentVal && currentVal !== 'Lainnya' && !Array.from(jabatanSelect.options).some(o => o.value === currentVal)) {
+                const customOpt = document.createElement('option');
+                customOpt.value = currentVal;
+                customOpt.textContent = currentVal;
+                customOpt.selected = true;
+                jabatanSelect.insertBefore(customOpt, jabatanSelect.lastElementChild);
+            }
+
+            checkCustomJabatanState();
+        }
+
+        function checkCustomJabatanState() {
+            if (!jabatanSelect || !jabatanCustomWrapper) return;
+            if (jabatanSelect.value === 'Lainnya') {
+                jabatanCustomWrapper.style.display = 'block';
+                if (jabatanCustomInput && !jabatanCustomInput.value) {
+                    jabatanCustomInput.focus();
+                }
+            } else {
+                jabatanCustomWrapper.style.display = 'none';
+            }
+        }
+
+        if (jabatanSelect) {
+            jabatanSelect.addEventListener('change', checkCustomJabatanState);
+        }
+
+        // Jalankan update jabatan saat ada perubahan checkbox organisasi
+        orgCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateJabatanOptions);
+        });
+        if (btnResetOrg) {
+            btnResetOrg.addEventListener('click', function() {
+                setTimeout(updateJabatanOptions, 10);
+            });
+        }
+
+        // Inisialisasi awal
+        updateJabatanOptions();
 
         // If backend returned errors on Step 2 fields, auto switch to Step 2
         @if ($errors->has('nim') || $errors->has('fakultas') || $errors->has('program_studi') || $errors->has('organisasi') || $errors->has('jabatan'))
