@@ -4,7 +4,7 @@
     <div class="d-flex align-items-center justify-content-between">
       <a href="{{ route('dashboard.index') }}" class="logo d-flex align-items-center">
         <img src="{{ asset('assets/img/logo_uis.png') }}" alt="Logo UIS" style="max-height: 32px; margin-right: 6px;">
-        <span class="d-none d-lg-block" style="font-family: 'Nunito', sans-serif; font-weight: 800; color: #1e3c72; letter-spacing: 0.5px;">SIMMAWA UIS</span>
+        <span class="d-none d-lg-block" style="font-family: 'Nunito', sans-serif; font-weight: 800; color: #1e3c72; letter-spacing: 0.5px;">SIMAWA UIS</span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->

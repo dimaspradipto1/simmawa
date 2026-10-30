@@ -57,7 +57,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <h5 class="card-title fw-bold m-0 p-0 text-dark">Daftar Logo Organisasi & Prodi</h5>
-                            <small class="text-muted">Mencakup BEM UIS, DPM UIS, seluruh UKM (SiPena, Perkusi, Badminton, dll.), dan HIMA per Program Studi.</small>
+                            <small class="text-muted">Mencakup BEM UIS, DPM UIS, seluruh UKM (Si Pena, Perkusi, Badminton, dll.), dan HIMA per Program Studi.</small>
                         </div>
                     </div>
 

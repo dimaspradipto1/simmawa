@@ -3,7 +3,7 @@
 @section('content')
 <div class="pagetitle">
     <h1>Dashboard</h1>
-    <p class="text-muted small mb-0">Selamat datang di Sistem Informasi Manajemen Kemahasiswaan (SIMMAWA) Universitas Ibnu Sina.</p>
+    <p class="text-muted small mb-0">Selamat datang di Sistem Informasi Manajemen Kemahasiswaan (SIMAWA) Universitas Ibnu Sina.</p>
     <nav class="mt-1">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Home</a></li>

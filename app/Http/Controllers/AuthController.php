@@ -70,9 +70,8 @@ class AuthController extends Controller
                     'HIMA KESMAS - Kesehatan Masyarakat'               => 'HIMA KESMAS - Kesehatan Masyarakat',
                 ],
                 'Unit Kegiatan Mahasiswa (UKM)' => [
-                    'UKM SiPena'                    => 'UKM SiPena (Sinergi Para Mahasiswa)',
-                    'UKM PERKUSI (Komputer)'        => 'UKM PERKUSI (Persatuan Komputer Mahasiswa UIS)',
-                    'UKM Perkusi (Seni Musik)'      => 'UKM Perkusi (Seni Musik & Kreativitas UIS)',
+                    'UKM Si Pena'                   => 'UKM Si Pena (Sinergi Pers Mahasiswa)',
+                    'UKM Perkusi'                   => 'UKM Perkusi (Perkumpulan Seni Mahasiswa Ibnu Sina)',
                     'UKM Mapala Ibnu Sina (MAPAIS)' => 'UKM MAPAIS (Mahasiswa Pecinta Alam Ibnu Sina)',
                     'UKM Badminton'                 => 'UKM Badminton UIS',
                     'UKM Futsal'                    => 'UKM Futsal Club UIS',
@@ -427,6 +426,20 @@ class AuthController extends Controller
                     'Keanggotaan' => ['Anggota HIMA KESMAS', 'Lainnya'],
                 ],
 
+                'UKM Si Pena' => [
+                    'Pengurus Inti' => [
+                        'Ketua',
+                        'Wakil Ketua',
+                        'Pimpinan Redaksi',
+                        'Sekretaris',
+                        'Bendahara',
+                    ],
+                    'Redaksi & Anggota' => [
+                        'Redaktur / Wartawan Mahasiswa',
+                        'Anggota',
+                    ],
+                    'Keanggotaan' => ['Lainnya'],
+                ],
                 'UKM SiPena' => [
                     'Pengurus Inti' => [
                         'Ketua',
@@ -590,7 +603,7 @@ class AuthController extends Controller
                     'Keanggotaan' => ['Lainnya'],
                 ],
 
-                'UKM Perkusi (Seni Musik)' => [
+                'UKM Perkusi' => [
                     'Pengurus Inti' => [
                         'Ketua',
                         'Wakil Ketua',
@@ -609,18 +622,21 @@ class AuthController extends Controller
                     ],
                     'Keanggotaan' => ['Lainnya'],
                 ],
-
-                'UKM PERKUSI (Komputer)' => [
+                'UKM Perkusi (Seni Musik)' => [
                     'Pengurus Inti' => [
                         'Ketua',
                         'Wakil Ketua',
                         'Sekretaris',
+                        'Wakil Sekretaris',
                         'Bendahara',
                     ],
-                    'Divisi' => [
-                        'Koordinator Divisi IT & Jaringan',
-                        'Koordinator Divisi Software / Coding',
-                        'Anggota Divisi',
+                    'Departemen' => [
+                        'Koordinator Departemen Humas',
+                        'Anggota Departemen Humas',
+                        'Koordinator Departemen Multimedia',
+                        'Anggota Departemen Multimedia',
+                        'Koordinator Departemen Seni',
+                        'Anggota Departemen Seni',
                         'Anggota',
                     ],
                     'Keanggotaan' => ['Lainnya'],
@@ -707,7 +723,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('dashboard.index')
-            ->with('success', 'Pendaftaran berhasil! Selamat datang di SIMMAWA UIS, ' . $user->name . '.');
+            ->with('success', 'Pendaftaran berhasil! Selamat datang di SIMAWA UIS, ' . $user->name . '.');
     }
 
     public function authenticate(AuthRequest $request)

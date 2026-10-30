@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
         $users = [
             // Superadmin
             [
-                'name'      => 'Super Admin SIMMAWA',
+                'name'      => 'Super Admin SIMAWA',
                 'email'     => 'superadmin@uis.ac.id',
                 'password'  => Hash::make('password'),
                 'role'      => 'superadmin',

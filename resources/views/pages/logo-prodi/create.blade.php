@@ -49,8 +49,8 @@
                         <!-- Singkatan / Akronim -->
                         <div class="col-md-4">
                             <label for="singkatan" class="form-label fw-semibold">Singkatan / Akronim</label>
-                            <input type="text" class="form-control @error('singkatan') is-invalid @enderror" id="singkatan" name="singkatan" value="{{ old('singkatan') }}" placeholder="Contoh: BEM / HMTI / SiPena">
-                            <div class="form-text small">Teks tebal di atas kartu KTA (misal: BEM, UKM SiPena, HIMATIF).</div>
+                            <input type="text" class="form-control @error('singkatan') is-invalid @enderror" id="singkatan" name="singkatan" value="{{ old('singkatan') }}" placeholder="Contoh: BEM / HMTI / Si Pena / Perkusi">
+                            <div class="form-text small">Teks tebal di atas kartu KTA (misal: BEM, UKM Si Pena, Perkusi, HIMATIF).</div>
                             @error('singkatan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -178,8 +178,8 @@
                 }
                 prodiHint.innerHTML = '<span class="text-success"><i class="bi bi-info-circle me-1"></i>UKM mencakup minat & bakat mahasiswa seluruh program studi.</span>';
                 fakultasHint.innerHTML = '<span class="text-muted">Tingkat Universitas (Lintas Fakultas).</span>';
-                singkatanInput.placeholder = 'Contoh: UKM SiPena / MAPAIS / PERKUSI';
-                namaOrgInput.placeholder = 'Contoh: UKM Sinergi Para Mahasiswa (SiPena)';
+                singkatanInput.placeholder = 'Contoh: UKM Si Pena / MAPAIS / Perkusi';
+                namaOrgInput.placeholder = 'Contoh: UKM Perkumpulan Seni Mahasiswa Ibnu Sina (Perkusi)';
             } else if (val === 'Lembaga Mahasiswa (BEM / DPM)') {
                 starProdi.style.display = 'none';
                 if (!prodiInput.value || prodiInput.value === 'S1 - Teknik Informatika') {

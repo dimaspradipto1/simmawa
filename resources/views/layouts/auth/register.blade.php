@@ -5,9 +5,9 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Pendaftaran Mahasiswa | SIMMAWA - Universitas Ibnu Sina</title>
-    <meta content="Pendaftaran Akun Mahasiswa Baru Sistem Informasi Manajemen Kemahasiswaan (SIMMAWA)" name="description">
-    <meta content="simmawa, kemahasiswaan, register, mahasiswa, uis" name="keywords">
+    <title>Pendaftaran Mahasiswa | SIMAWA - Universitas Ibnu Sina</title>
+    <meta content="Pendaftaran Akun Mahasiswa Baru Sistem Informasi Manajemen Kemahasiswaan (SIMAWA)" name="description">
+    <meta content="simawa, kemahasiswaan, register, mahasiswa, uis" name="keywords">
 
     <!-- Favicons -->
     <link href="{{ asset('assets/img/logo_uis.png') }}" rel="icon">
@@ -701,7 +701,7 @@
             <div class="card-left">
                 <div class="brand-header">
                     <img src="{{ asset('assets/img/logo_uis.png') }}" class="brand-logo" alt="Logo UIS" height="42" width="42">
-                    <span class="brand-name">SIMMAWA UIS</span>
+                    <span class="brand-name">SIMAWA UIS</span>
                 </div>
 
                 <div class="brand-body-content">
@@ -711,7 +711,7 @@
                         <span class="text-gradient">Prestasi Terbaikmu</span>
                     </h1>
                     <p class="brand-desc">
-                        Daftarkan akun SIMMAWA untuk mendokumentasikan kejuaraan, sertifikasi, rekognisi, serta keikutsertaan organisasi kemahasiswaan di Universitas Ibnu Sina.
+                        Daftarkan akun SIMAWA untuk mendokumentasikan kejuaraan, sertifikasi, rekognisi, serta keikutsertaan organisasi kemahasiswaan di Universitas Ibnu Sina.
                     </p>
 
                     <ul class="benefit-list">
@@ -741,7 +741,7 @@
                     <!-- Mobile Header (Show only on small screens) -->
                     <div class="text-center d-lg-none mb-3">
                         <img src="{{ asset('assets/img/logo_uis.png') }}" alt="Logo UIS" height="54" width="54" class="mb-1">
-                        <h2 class="fw-bold" style="color: var(--primary-green); font-family: 'Nunito', sans-serif; margin-bottom: 0; font-size: 1.45rem;">SIMMAWA UIS</h2>
+                        <h2 class="fw-bold" style="color: var(--primary-green); font-family: 'Nunito', sans-serif; margin-bottom: 0; font-size: 1.45rem;">SIMAWA UIS</h2>
                         <p class="text-secondary small mb-0" style="font-weight: 500;">Pendaftaran Akun Mahasiswa</p>
                     </div>
 

@@ -50,8 +50,8 @@
                         <!-- Singkatan / Akronim -->
                         <div class="col-md-4">
                             <label for="singkatan" class="form-label fw-semibold">Singkatan / Akronim</label>
-                            <input type="text" class="form-control @error('singkatan') is-invalid @enderror" id="singkatan" name="singkatan" value="{{ old('singkatan', $logoProdi->singkatan) }}" placeholder="Contoh: BEM / HMTI / SiPena">
-                            <div class="form-text small">Teks tebal di atas kartu KTA (misal: BEM, UKM SiPena, HIMATIF).</div>
+                            <input type="text" class="form-control @error('singkatan') is-invalid @enderror" id="singkatan" name="singkatan" value="{{ old('singkatan', $logoProdi->singkatan) }}" placeholder="Contoh: BEM / HMTI / Si Pena / Perkusi">
+                            <div class="form-text small">Teks tebal di atas kartu KTA (misal: BEM, UKM Si Pena, Perkusi, HIMATIF).</div>
                             @error('singkatan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
