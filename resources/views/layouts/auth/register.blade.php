@@ -990,7 +990,7 @@
                         <div class="text-center mt-3 pt-2 border-top">
                             <p class="text-muted small mb-0">
                                 Sudah memiliki akun? 
-                                <a href="{{ route('login') }}" class="fw-bold text-success text-decoration-none">Masuk ke Sistem</a>
+                                <a href="{{ route('login') }}" class="fw-bold text-success text-decoration-none text-nowrap">Masuk ke Sistem</a>
                             </p>
                         </div>
                     </form>

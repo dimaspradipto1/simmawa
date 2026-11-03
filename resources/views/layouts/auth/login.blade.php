@@ -104,7 +104,7 @@
 
         /* Left Side: Modern Brand and Illustration */
         .card-left {
-            flex: 1.25;
+            flex: 1.15;
             background: linear-gradient(135deg, rgba(4, 107, 38, 0.85) 0%, rgba(5, 13, 7, 0.95) 100%);
             padding: 2rem 2.2rem;
             display: flex;
@@ -223,12 +223,24 @@
 
         /* Right Side: Clean Login Form */
         .card-right {
-            flex: 0.85;
+            flex: 0.95;
             background-color: #ffffff;
-            padding: 3rem 3rem;
+            padding: 2.8rem 2.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .auth-footer-text {
+            font-size: 0.83rem;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .auth-footer-text {
+                white-space: normal;
+                font-size: 0.8rem;
+            }
         }
 
         .login-card {
@@ -483,9 +495,9 @@
                         </button>
 
                         <div class="text-center mt-3 pt-2 border-top">
-                            <p class="text-muted small mb-0">
+                            <p class="text-muted auth-footer-text mb-0">
                                 Belum memiliki akun mahasiswa? 
-                                <a href="{{ route('register') }}" class="fw-bold text-success text-decoration-none">Daftar Sekarang</a>
+                                <a href="{{ route('register') }}" class="fw-bold text-success text-decoration-none text-nowrap">Daftar Sekarang</a>
                             </p>
                         </div>
                     </form>
