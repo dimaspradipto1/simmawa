@@ -721,7 +721,7 @@
                         </li>
                         <li>
                             <i class="bi bi-person-vcard-fill"></i>
-                            Pembuatan Kartu Tanda Anggota (KTM / KTA) otomatis
+                            Pembuatan Kartu Tanda Anggota (KTA) otomatis
                         </li>
                         <li>
                             <i class="bi bi-award-fill"></i>

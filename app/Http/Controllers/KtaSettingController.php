@@ -17,7 +17,7 @@ class KtaSettingController extends Controller
     protected function authorizeAdmin(): void
     {
         if (!in_array(Auth::user()->role, ['superadmin', 'adminbkak'])) {
-            abort(403, 'Anda tidak memiliki hak akses ke halaman pengaturan KTA / KTM.');
+            abort(403, 'Anda tidak memiliki hak akses ke halaman pengaturan KTA.');
         }
     }
 
@@ -92,7 +92,7 @@ class KtaSettingController extends Controller
         $setting->update($validated);
 
         return redirect()->route('kta-setting.index')
-            ->with('success', 'Pengaturan Periode & Kartu Tanda Anggota (KTA / KTM) berhasil diperbarui.');
+            ->with('success', 'Pengaturan Periode & Kartu Tanda Anggota (KTA) berhasil diperbarui.');
     }
 }
 

@@ -2,15 +2,15 @@
 
 @section('content')
 <div class="pagetitle">
-    <h1>Pengaturan Kartu Tanda Anggota (KTA / KTM)</h1>
+    <h1>Pengaturan Kartu Tanda Anggota (KTA)</h1>
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
             <li class="breadcrumb-item">Pengaturan</li>
-            <li class="breadcrumb-item active">Pengaturan KTA / KTM</li>
+            <li class="breadcrumb-item active">Pengaturan KTA</li>
         </ol>
     </nav>
-    <p class="text-muted small">Atur tahun periode kepengurusan, teks masa berlaku kartu, dan template latar belakang Kartu Tanda Anggota (KTM / KTA) mahasiswa.</p>
+    <p class="text-muted small">Atur tahun periode kepengurusan, teks masa berlaku kartu, dan template latar belakang Kartu Tanda Anggota (KTA) mahasiswa.</p>
 </div><!-- End Page Title -->
 
 <section class="section">
@@ -22,7 +22,7 @@
                     <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 mb-2">
                         <i class="bi bi-card-heading me-1"></i> Pengaturan Periode & Kartu Ormawa
                     </span>
-                    <h5 class="fw-bold text-dark mb-1">Konfigurasi Kartu Tanda Anggota (KTA / KTM)</h5>
+                    <h5 class="fw-bold text-dark mb-1">Konfigurasi Kartu Tanda Anggota (KTA)</h5>
                     <p class="text-secondary small mb-0">Perubahan periode kepengurusan dan teks masa berlaku di halaman ini akan otomatis diterapkan ke seluruh kartu KTA mahasiswa pada profil mereka.</p>
                 </div>
                 <div class="flex-shrink-0">
@@ -310,7 +310,7 @@
 
 @push('scripts')
 <style>
-    /* KTM / KTA Card Responsive Styling */
+    /* KTA Card Responsive Styling */
     .kta-card-container {
         width: 100%;
         max-width: 680px;

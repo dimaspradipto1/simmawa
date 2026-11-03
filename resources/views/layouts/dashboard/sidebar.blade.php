@@ -118,7 +118,14 @@
       <li class="nav-item">
         <a class="nav-link {{ request()->routeIs('kta-setting.*') ? '' : 'collapsed' }}" href="{{ route('kta-setting.index') }}">
           <i class="bi bi-card-heading"></i>
-          <span>Pengaturan KTA / KTM</span>
+          <span>Pengaturan KTA</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('database-backup.*') ? '' : 'collapsed' }}" href="{{ route('database-backup.index') }}">
+          <i class="bi bi-database-check"></i>
+          <span>Backup Database & Storage</span>
         </a>
       </li>
     @endif

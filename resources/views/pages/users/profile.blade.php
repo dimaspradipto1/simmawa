@@ -133,7 +133,7 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-ktm"
-                                    role="tab"><i class="bi bi-card-heading me-1"></i> Kartu Anggota (KTM)</button>
+                                    role="tab"><i class="bi bi-card-heading me-1"></i> Kartu Anggota (KTA)</button>
                             </li>
                         </ul>
 
@@ -376,11 +376,11 @@
                                 </form>
                             </div>
 
-                            <!-- KTM / KTA Tab (Masing-masing Kartu Organisasi & Tab Nav) -->
+                            <!-- KTA Tab (Masing-masing Kartu Organisasi & Tab Nav) -->
                             <div class="tab-pane fade" id="profile-ktm" role="tabpanel">
                                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom gap-2">
                                     <div>
-                                        <h5 class="card-title p-0 m-0">Kartu Tanda Anggota (KTM / KTA)</h5>
+                                        <h5 class="card-title p-0 m-0">Kartu Tanda Anggota (KTA)</h5>
                                         <small class="text-muted">Setiap organisasi yang Anda ikuti memiliki Kartu Anggota resmi tersendiri.</small>
                                     </div>
                                     <div class="d-flex gap-2">

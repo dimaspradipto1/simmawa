@@ -14,6 +14,7 @@ use App\Http\Controllers\LogoProdiController;
 use App\Http\Controllers\TemplateLpjController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KtaSettingController;
+use App\Http\Controllers\DatabaseBackupController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -75,9 +76,16 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     // Logo Prodi Resource Routes
     Route::resource('logo-prodi', LogoProdiController::class);
 
-    // Pengaturan KTA / KTM Resource Routes (Superadmin & Admin BKAK)
+    // Pengaturan KTA Resource Routes (Superadmin & Admin BKAK)
     Route::get('kta-setting', [KtaSettingController::class, 'index'])->name('kta-setting.index');
     Route::put('kta-setting', [KtaSettingController::class, 'update'])->name('kta-setting.update');
+
+    // Backup Database & Storage Routes (Superadmin & Admin BKAK)
+    Route::get('backup-database-storage', [DatabaseBackupController::class, 'index'])->name('database-backup.index');
+    Route::get('backup-database-storage/export-sql', [DatabaseBackupController::class, 'export'])->name('database-backup.export');
+    Route::post('backup-database-storage/import-sql', [DatabaseBackupController::class, 'import'])->name('database-backup.import');
+    Route::get('backup-database-storage/export-storage', [DatabaseBackupController::class, 'exportPublicStorage'])->name('database-backup.storage-public');
+    Route::post('backup-database-storage/import-storage', [DatabaseBackupController::class, 'importPublicStorage'])->name('database-backup.storage-public.import');
 
     // Template LPJ Resource Routes
     Route::get('template-lpj/{template_lpj}/download', [TemplateLpjController::class, 'download'])->name('template-lpj.download');
