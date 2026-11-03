@@ -30,6 +30,12 @@ class UserDataTable extends DataTable
                     </div>
                 </div>';
             })
+            ->editColumn('email', function ($user) {
+                return '<div>
+                    <div>' . e($user->email) . '</div>
+                    ' . ($user->no_hp ? '<small class="text-muted"><i class="bi bi-telephone text-success me-1"></i>' . e($user->no_hp) . '</small>' : '') . '
+                </div>';
+            })
             ->editColumn('role', function ($user) {
                 $badgeClasses = [
                     'superadmin'       => 'bg-danger',
@@ -71,7 +77,7 @@ class UserDataTable extends DataTable
 
                 return '<div class="action-btn-group" role="group">' . $btnEdit . $btnDelete . '</div>';
             })
-            ->rawColumns(['name', 'role', 'is_active', 'action'])
+            ->rawColumns(['name', 'email', 'role', 'is_active', 'action'])
             ->setRowId('id');
     }
 

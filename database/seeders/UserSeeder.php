@@ -151,6 +151,7 @@ class UserSeeder extends Seeder
             [
                 'name'          => 'Mahasiswa Berprestasi',
                 'email'         => 'mahasiswa@uis.ac.id',
+                'no_hp'         => '081270001101',
                 'password'      => Hash::make('password'),
                 'role'          => 'mahasiswa',
                 'nim'           => '201055201001',
@@ -163,6 +164,7 @@ class UserSeeder extends Seeder
             [
                 'name'          => 'Frida Ayu Wulandari',
                 'email'         => 'frida.wulandari@student.uis.ac.id',
+                'no_hp'         => '081270001102',
                 'password'      => Hash::make('password'),
                 'role'          => 'mahasiswa',
                 'nim'           => '201055201025',
@@ -175,6 +177,7 @@ class UserSeeder extends Seeder
             [
                 'name'      => 'Rizky Pratama Putra',
                 'email'     => 'rizky.pratama@student.uis.ac.id',
+                'no_hp'     => '081270001103',
                 'password'  => Hash::make('password'),
                 'role'      => 'mahasiswa',
                 'is_active' => true,
@@ -182,6 +185,7 @@ class UserSeeder extends Seeder
             [
                 'name'      => 'Anisa Nurul Hidayah',
                 'email'     => 'anisa.hidayah@student.uis.ac.id',
+                'no_hp'     => '081270001104',
                 'password'  => Hash::make('password'),
                 'role'      => 'mahasiswa',
                 'is_active' => false,

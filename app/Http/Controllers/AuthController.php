@@ -676,6 +676,7 @@ class AuthController extends Controller
         $request->validate([
             'name'          => 'required|string|max:255',
             'email'         => 'required|string|email|max:255|unique:users,email',
+            'no_hp'         => 'required|string|max:30',
             'password'      => 'required|string|min:6|confirmed',
             'nim'           => 'nullable|string|max:50',
             'fakultas'      => 'nullable|string|max:255',
@@ -689,6 +690,8 @@ class AuthController extends Controller
             'email.required'     => 'Alamat email wajib diisi.',
             'email.email'        => 'Format alamat email tidak valid.',
             'email.unique'       => 'Email ini telah terdaftar, silakan gunakan email lain atau login.',
+            'no_hp.required'     => 'Nomor WhatsApp / HP wajib diisi.',
+            'no_hp.max'          => 'Nomor WhatsApp / HP maksimal 30 karakter.',
             'password.required'  => 'Password wajib diisi.',
             'password.min'       => 'Password minimal terdiri dari 6 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
@@ -709,6 +712,7 @@ class AuthController extends Controller
         $user = User::create([
             'name'          => trim($request->name),
             'email'         => strtolower(trim($request->email)),
+            'no_hp'         => trim($request->no_hp),
             'password'      => Hash::make($request->password),
             'role'          => 'mahasiswa',
             'nim'           => $request->filled('nim') ? trim($request->nim) : null,
@@ -883,6 +887,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'no_hp'          => ['nullable', 'string', 'max:30'],
             'nim'            => ['nullable', 'string', 'max:50'],
             'fakultas'       => ['nullable', 'string', 'max:255'],
             'program_studi'  => ['nullable', 'string', 'max:255'],

@@ -817,6 +817,20 @@
                                 </div>
                             </div>
 
+                            <!-- Nomor WhatsApp / HP -->
+                            <div class="mb-2">
+                                <label for="no_hp" class="form-label">Nomor WhatsApp / HP <span class="text-danger">*</span></label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" name="no_hp" id="no_hp" 
+                                        class="form-input @error('no_hp') is-invalid @enderror" 
+                                        placeholder="Contoh: 081234567890" 
+                                        value="{{ old('no_hp') }}" 
+                                        required autocomplete="tel">
+                                </div>
+                                <div class="field-feedback" id="feedback-no-hp">Nomor WhatsApp / HP aktif wajib diisi (minimal 9 digit).</div>
+                            </div>
+
                             <!-- Password -->
                             <div class="mb-2">
                                 <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
@@ -1043,11 +1057,13 @@
 
         const inputName = document.getElementById('name');
         const inputEmail = document.getElementById('email');
+        const inputNoHp = document.getElementById('no_hp');
         const inputPassword = document.getElementById('password');
         const inputPasswordConfirm = document.getElementById('password_confirmation');
 
         const feedbackName = document.getElementById('feedback-name');
         const feedbackEmail = document.getElementById('feedback-email');
+        const feedbackNoHp = document.getElementById('feedback-no-hp');
         const feedbackPassword = document.getElementById('feedback-password');
         const feedbackConfirmPassword = document.getElementById('feedback-confirm-password');
 
@@ -1085,8 +1101,8 @@
             let isValid = true;
 
             // Reset feedbacks
-            [inputName, inputEmail, inputPassword, inputPasswordConfirm].forEach(el => el.classList.remove('is-invalid'));
-            [feedbackName, feedbackEmail, feedbackPassword, feedbackConfirmPassword].forEach(el => el.classList.remove('show'));
+            [inputName, inputEmail, inputNoHp, inputPassword, inputPasswordConfirm].forEach(el => el && el.classList.remove('is-invalid'));
+            [feedbackName, feedbackEmail, feedbackNoHp, feedbackPassword, feedbackConfirmPassword].forEach(el => el && el.classList.remove('show'));
 
             // Name
             if (!inputName.value.trim()) {
@@ -1101,6 +1117,16 @@
                 inputEmail.classList.add('is-invalid');
                 feedbackEmail.classList.add('show');
                 isValid = false;
+            }
+
+            // No HP
+            if (inputNoHp) {
+                const phoneVal = inputNoHp.value.trim().replace(/[^0-9+]/g, '');
+                if (!phoneVal || phoneVal.length < 9) {
+                    inputNoHp.classList.add('is-invalid');
+                    feedbackNoHp.classList.add('show');
+                    isValid = false;
+                }
             }
 
             // Password

@@ -54,6 +54,15 @@
                         </div>
 
                         <div class="w-100 text-start border-top pt-3 mt-1">
+                            @if ($user->no_hp)
+                                <div class="d-flex align-items-center mb-2 small">
+                                    <i class="bi bi-telephone text-success me-2 fs-6"></i>
+                                    <div>
+                                        <span class="text-muted d-block">No. WhatsApp / HP</span>
+                                        <span class="fw-semibold text-dark">{{ $user->no_hp }}</span>
+                                    </div>
+                                </div>
+                            @endif
                             @if ($user->nim)
                                 <div class="d-flex align-items-center mb-2 small">
                                     <i class="bi bi-person-vcard text-primary me-2 fs-6"></i>
@@ -190,6 +199,16 @@
                                             id="email" name="email" value="{{ old('email', $user->email) }}"
                                             required>
                                         @error('email')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="no_hp" class="form-label">Nomor WhatsApp / HP</label>
+                                        <input type="text" class="form-control @error('no_hp') is-invalid @enderror"
+                                            id="no_hp" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}"
+                                            placeholder="Contoh: 081234567890">
+                                        @error('no_hp')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>

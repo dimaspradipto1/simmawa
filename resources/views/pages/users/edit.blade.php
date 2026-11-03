@@ -41,6 +41,14 @@
                         </div>
 
                         <div class="col-md-6">
+                            <label for="no_hp" class="form-label">Nomor WhatsApp / HP</label>
+                            <input type="text" class="form-control @error('no_hp') is-invalid @enderror" id="no_hp" name="no_hp" value="{{ old('no_hp', $user->no_hp) }}" placeholder="Contoh: 081234567890">
+                            @error('no_hp')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
                             <label for="role" class="form-label">Role Akses <span class="text-danger">*</span></label>
                             <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
                                 <option value="" disabled>-- Pilih Role --</option>
