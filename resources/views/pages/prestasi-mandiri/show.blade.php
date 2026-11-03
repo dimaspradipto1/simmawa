@@ -98,12 +98,18 @@
                     </div>
                 </div>
 
-                <!-- Link Dokumen Sertifikat & Tanggal Sertifikat -->
+                <!-- Dokumen Sertifikat & Tanggal Sertifikat -->
                 <div class="col-md-6">
-                    <label class="form-label small fw-bold text-dark mb-1">Link Dokumen Sertifikat</label>
+                    <label class="form-label small fw-bold text-dark mb-1">Dokumen Sertifikat</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small text-break">
-                        @if($prestasiMandiri->link_dokumen_sertifikat)
-                            <a href="{{ $prestasiMandiri->link_dokumen_sertifikat }}" target="_blank" class="text-primary text-decoration-none">{{ $prestasiMandiri->link_dokumen_sertifikat }}</a>
+                        @if($prestasiMandiri->file_dokumen_sertifikat)
+                            <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'sertifikat']) }}" class="btn btn-sm btn-outline-primary py-1 px-3 d-inline-flex align-items-center" target="_blank">
+                                <i class="bi bi-file-earmark-check me-1"></i> Unduh Berkas Sertifikat
+                            </a>
+                        @elseif($prestasiMandiri->link_dokumen_sertifikat)
+                            <a href="{{ $prestasiMandiri->link_dokumen_sertifikat }}" target="_blank" class="text-primary text-decoration-none">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> {{ $prestasiMandiri->link_dokumen_sertifikat }}
+                            </a>
                         @else
                             -
                         @endif
@@ -140,26 +146,60 @@
                     </div>
                 </div>
 
-                <!-- Link Dokumen LPJ & File Dokumen LPJ -->
-                <div class="col-md-6">
-                    <label class="form-label small fw-bold text-dark mb-1">Link Dokumen LPJ</label>
-                    <div class="p-2 rounded bg-light border-0 text-dark small text-break">
-                        @if($prestasiMandiri->link_dokumen_lpj)
-                            <a href="{{ $prestasiMandiri->link_dokumen_lpj }}" target="_blank" class="text-primary text-decoration-none">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> {{ $prestasiMandiri->link_dokumen_lpj }}
-                            </a>
-                        @else
-                            -
-                        @endif
-                    </div>
-                </div>
-
+                <!-- File Dokumen LPJ -->
                 <div class="col-md-6">
                     <label class="form-label small fw-bold text-dark mb-1">Berkas File LPJ</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small">
                         @if($prestasiMandiri->file_dokumen_lpj)
                             <a href="{{ route('prestasi-mandiri.download-lpj', $prestasiMandiri->id) }}" class="btn btn-sm btn-outline-success py-1 px-3 d-inline-flex align-items-center" target="_blank">
                                 <i class="bi bi-download me-1"></i> Unduh Berkas LPJ
+                            </a>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Dokumen Tambahan & Kontak -->
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark mb-1">No. HP / WhatsApp</label>
+                    <div class="p-2 rounded bg-light border-0 text-dark small">
+                        {{ $prestasiMandiri->no_hp ?? '-' }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark mb-1">KTM (Kartu Tanda Mahasiswa)</label>
+                    <div class="p-2 rounded bg-light border-0 text-dark small">
+                        @if($prestasiMandiri->file_ktm)
+                            <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'ktm']) }}" class="btn btn-sm btn-outline-primary py-1 px-3 d-inline-flex align-items-center" target="_blank">
+                                <i class="bi bi-person-badge me-1"></i> Unduh KTM
+                            </a>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark mb-1">Surat Pengajuan Reward Prestasi</label>
+                    <div class="p-2 rounded bg-light border-0 text-dark small">
+                        @if($prestasiMandiri->file_pengajuan_reward)
+                            <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'reward']) }}" class="btn btn-sm btn-outline-success py-1 px-3 d-inline-flex align-items-center" target="_blank">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i> Unduh Surat Reward
+                            </a>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-dark mb-1">Surat Tugas WR III / WD I</label>
+                    <div class="p-2 rounded bg-light border-0 text-dark small">
+                        @if($prestasiMandiri->file_surat_tugas)
+                            <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'surat-tugas']) }}" class="btn btn-sm btn-outline-info py-1 px-3 d-inline-flex align-items-center" target="_blank">
+                                <i class="bi bi-file-earmark-check me-1"></i> Unduh Surat Tugas
                             </a>
                         @else
                             <span class="text-muted">-</span>

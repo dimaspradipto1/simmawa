@@ -60,4 +60,19 @@ class TemplateLpj extends Model
         }
         return $query->latest()->first();
     }
+
+    /**
+     * Get all active templates for a category.
+     */
+    public static function getActiveTemplates(?string $kategori = 'Prestasi Mandiri')
+    {
+        $query = static::where('is_active', true);
+        if ($kategori) {
+            $matched = (clone $query)->where('kategori', $kategori)->latest()->get();
+            if ($matched->isNotEmpty()) {
+                return $matched;
+            }
+        }
+        return $query->latest()->get();
+    }
 }

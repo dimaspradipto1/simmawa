@@ -112,7 +112,8 @@ class PrestasiMandiriController extends Controller
         $options = $this->getFormOptions();
         $prestasiMandiri = new PrestasiMandiri();
         $activeTemplateLpj = TemplateLpj::getActiveTemplate('Prestasi Mandiri');
-        return view('pages.prestasi-mandiri.create', compact('options', 'prestasiMandiri', 'activeTemplateLpj'));
+        $activeTemplatesLpj = TemplateLpj::getActiveTemplates('Prestasi Mandiri');
+        return view('pages.prestasi-mandiri.create', compact('options', 'prestasiMandiri', 'activeTemplateLpj', 'activeTemplatesLpj'));
     }
 
     /**
@@ -131,12 +132,17 @@ class PrestasiMandiriController extends Controller
             'kepesertaan'             => ['required', 'string'],
             'bentuk'                  => ['required', 'string'],
             'url_kompetisi'           => ['nullable', 'url', 'max:255'],
-            'link_dokumen_sertifikat' => ['nullable', 'url', 'max:255'],
+            'link_dokumen_sertifikat' => ['nullable', 'string', 'max:255'],
+            'file_dokumen_sertifikat' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:20480'],
             'tanggal_sertifikat'      => ['nullable', 'date'],
             'link_foto_upp'           => ['nullable', 'url', 'max:255'],
             'link_dokumen_undangan'   => ['nullable', 'url', 'max:255'],
             'link_dokumen_lpj'        => ['nullable', 'url', 'max:255'],
             'file_dokumen_lpj'        => ['nullable', 'file', 'mimes:pdf,doc,docx,zip', 'max:20480'],
+            'no_hp'                   => ['nullable', 'string', 'max:30'],
+            'file_pengajuan_reward'   => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:20480'],
+            'file_ktm'                => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'file_surat_tugas'        => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:20480'],
             'keterangan'              => ['nullable', 'string'],
             'data_mahasiswa'          => ['nullable', 'array'],
             'data_mahasiswa.*.nim'    => ['nullable', 'string'],
@@ -182,10 +188,43 @@ class PrestasiMandiriController extends Controller
             }
         }
 
+        if ($request->hasFile('file_dokumen_sertifikat')) {
+            $file = $request->file('file_dokumen_sertifikat');
+            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_dokumen_sertifikat')) {
+            if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
+                Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
+            }
+            $file = $request->file('file_dokumen_sertifikat');
+            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
+        }
+
         if ($request->hasFile('file_dokumen_lpj')) {
             $file = $request->file('file_dokumen_lpj');
             $storedName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
             $validated['file_dokumen_lpj'] = $file->storeAs('dokumen_lpj', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_pengajuan_reward')) {
+            $file = $request->file('file_pengajuan_reward');
+            $storedName = time() . '_reward_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_pengajuan_reward'] = $file->storeAs('surat_reward', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_ktm')) {
+            $file = $request->file('file_ktm');
+            $storedName = time() . '_ktm_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_ktm'] = $file->storeAs('ktm', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_surat_tugas')) {
+            $file = $request->file('file_surat_tugas');
+            $storedName = time() . '_surattugas_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_surat_tugas'] = $file->storeAs('surat_tugas', $storedName, 'public');
         }
 
         $validated['data_mahasiswa'] = $mahasiswa;
@@ -244,7 +283,8 @@ class PrestasiMandiriController extends Controller
         $this->authorizeStudentAccess($prestasiMandiri);
         $options = $this->getFormOptions();
         $activeTemplateLpj = TemplateLpj::getActiveTemplate('Prestasi Mandiri');
-        return view('pages.prestasi-mandiri.edit', compact('options', 'prestasiMandiri', 'activeTemplateLpj'));
+        $activeTemplatesLpj = TemplateLpj::getActiveTemplates('Prestasi Mandiri');
+        return view('pages.prestasi-mandiri.edit', compact('options', 'prestasiMandiri', 'activeTemplateLpj', 'activeTemplatesLpj'));
     }
 
     /**
@@ -265,12 +305,17 @@ class PrestasiMandiriController extends Controller
             'kepesertaan'             => ['required', 'string'],
             'bentuk'                  => ['required', 'string'],
             'url_kompetisi'           => ['nullable', 'url', 'max:255'],
-            'link_dokumen_sertifikat' => ['nullable', 'url', 'max:255'],
+            'link_dokumen_sertifikat' => ['nullable', 'string', 'max:255'],
+            'file_dokumen_sertifikat' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:20480'],
             'tanggal_sertifikat'      => ['nullable', 'date'],
             'link_foto_upp'           => ['nullable', 'url', 'max:255'],
             'link_dokumen_undangan'   => ['nullable', 'url', 'max:255'],
             'link_dokumen_lpj'        => ['nullable', 'url', 'max:255'],
             'file_dokumen_lpj'        => ['nullable', 'file', 'mimes:pdf,doc,docx,zip', 'max:20480'],
+            'no_hp'                   => ['nullable', 'string', 'max:30'],
+            'file_pengajuan_reward'   => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:20480'],
+            'file_ktm'                => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'file_surat_tugas'        => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:20480'],
             'keterangan'              => ['nullable', 'string'],
             'data_mahasiswa'          => ['nullable', 'array'],
             'data_dosen'              => ['nullable', 'array'],
@@ -311,13 +356,58 @@ class PrestasiMandiriController extends Controller
             }
         }
 
+        if ($request->hasFile('file_dokumen_sertifikat')) {
+            $file = $request->file('file_dokumen_sertifikat');
+            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_dokumen_sertifikat')) {
+            if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
+                Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
+            }
+            $file = $request->file('file_dokumen_sertifikat');
+            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
+        }
+
         if ($request->hasFile('file_dokumen_lpj')) {
-            if ($prestasiMandiri->file_dokumen_lpj && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_lpj)) {
+            if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
+            Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
+        }
+        if ($prestasiMandiri->file_dokumen_lpj && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_lpj)) {
                 Storage::disk('public')->delete($prestasiMandiri->file_dokumen_lpj);
             }
             $file = $request->file('file_dokumen_lpj');
             $storedName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
             $validated['file_dokumen_lpj'] = $file->storeAs('dokumen_lpj', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_pengajuan_reward')) {
+            if ($prestasiMandiri->file_pengajuan_reward && Storage::disk('public')->exists($prestasiMandiri->file_pengajuan_reward)) {
+                Storage::disk('public')->delete($prestasiMandiri->file_pengajuan_reward);
+            }
+            $file = $request->file('file_pengajuan_reward');
+            $storedName = time() . '_reward_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_pengajuan_reward'] = $file->storeAs('surat_reward', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_ktm')) {
+            if ($prestasiMandiri->file_ktm && Storage::disk('public')->exists($prestasiMandiri->file_ktm)) {
+                Storage::disk('public')->delete($prestasiMandiri->file_ktm);
+            }
+            $file = $request->file('file_ktm');
+            $storedName = time() . '_ktm_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_ktm'] = $file->storeAs('ktm', $storedName, 'public');
+        }
+
+        if ($request->hasFile('file_surat_tugas')) {
+            if ($prestasiMandiri->file_surat_tugas && Storage::disk('public')->exists($prestasiMandiri->file_surat_tugas)) {
+                Storage::disk('public')->delete($prestasiMandiri->file_surat_tugas);
+            }
+            $file = $request->file('file_surat_tugas');
+            $storedName = time() . '_surattugas_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+            $validated['file_surat_tugas'] = $file->storeAs('surat_tugas', $storedName, 'public');
         }
 
         $validated['data_mahasiswa'] = $mahasiswa;
@@ -339,8 +429,20 @@ class PrestasiMandiriController extends Controller
     {
         $this->authorizeStudentAccess($prestasiMandiri);
 
+        if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
+            Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
+        }
         if ($prestasiMandiri->file_dokumen_lpj && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_lpj)) {
             Storage::disk('public')->delete($prestasiMandiri->file_dokumen_lpj);
+        }
+        if ($prestasiMandiri->file_pengajuan_reward && Storage::disk('public')->exists($prestasiMandiri->file_pengajuan_reward)) {
+            Storage::disk('public')->delete($prestasiMandiri->file_pengajuan_reward);
+        }
+        if ($prestasiMandiri->file_ktm && Storage::disk('public')->exists($prestasiMandiri->file_ktm)) {
+            Storage::disk('public')->delete($prestasiMandiri->file_ktm);
+        }
+        if ($prestasiMandiri->file_surat_tugas && Storage::disk('public')->exists($prestasiMandiri->file_surat_tugas)) {
+            Storage::disk('public')->delete($prestasiMandiri->file_surat_tugas);
         }
 
         $prestasiMandiri->delete();
@@ -358,12 +460,29 @@ class PrestasiMandiriController extends Controller
      */
     public function downloadUploadedLpj(PrestasiMandiri $prestasiMandiri)
     {
+        return $this->downloadFile($prestasiMandiri, 'lpj');
+    }
+
+    /**
+     * Download uploaded document files for Prestasi Mandiri
+     */
+    public function downloadFile(PrestasiMandiri $prestasiMandiri, string $type)
+    {
         $this->authorizeStudentAccess($prestasiMandiri);
 
-        if ($prestasiMandiri->file_dokumen_lpj && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_lpj)) {
-            return Storage::disk('public')->download($prestasiMandiri->file_dokumen_lpj);
+        $filePath = match($type) {
+            'lpj'         => $prestasiMandiri->file_dokumen_lpj,
+            'sertifikat'  => $prestasiMandiri->file_dokumen_sertifikat,
+            'reward'      => $prestasiMandiri->file_pengajuan_reward,
+            'ktm'         => $prestasiMandiri->file_ktm,
+            'surat-tugas' => $prestasiMandiri->file_surat_tugas,
+            default       => null,
+        };
+
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->download($filePath);
         }
 
-        abort(404, 'Berkas dokumen LPJ tidak ditemukan.');
+        abort(404, 'Berkas dokumen tidak ditemukan.');
     }
 }

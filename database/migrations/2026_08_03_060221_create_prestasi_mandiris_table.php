@@ -24,11 +24,16 @@ return new class extends Migration
             $table->string('bentuk')->nullable();
             $table->string('url_kompetisi')->nullable();
             $table->string('link_dokumen_sertifikat')->nullable();
+            $table->string('file_dokumen_sertifikat')->nullable();
             $table->date('tanggal_sertifikat')->nullable();
             $table->string('link_foto_upp')->nullable();
             $table->string('link_dokumen_undangan')->nullable();
             $table->string('link_dokumen_lpj')->nullable();
             $table->string('file_dokumen_lpj')->nullable();
+            $table->string('no_hp')->nullable();
+            $table->string('file_pengajuan_reward')->nullable();
+            $table->string('file_ktm')->nullable();
+            $table->string('file_surat_tugas')->nullable();
             $table->text('keterangan')->nullable();
             $table->integer('tahun')->nullable();
             $table->string('pt')->default('Universitas Ibnu Sina');

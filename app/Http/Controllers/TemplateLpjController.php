@@ -74,10 +74,6 @@ class TemplateLpjController extends Controller implements HasMiddleware
 
         $isActive = $request->boolean('is_active', false);
 
-        if ($isActive) {
-            TemplateLpj::where('kategori', $validated['kategori'])->update(['is_active' => false]);
-        }
-
         $filePath = null;
         $fileName = null;
 
@@ -150,10 +146,6 @@ class TemplateLpjController extends Controller implements HasMiddleware
         ]);
 
         $isActive = $request->boolean('is_active', false);
-
-        if ($isActive && !$templateLpj->is_active) {
-            TemplateLpj::where('kategori', $validated['kategori'])->update(['is_active' => false]);
-        }
 
         $filePath = $templateLpj->file_path;
         $fileName = $templateLpj->file_name;

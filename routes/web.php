@@ -57,6 +57,7 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     // Prestasi Mandiri Resource Routes
     Route::get('prestasi-mandiri/template-lpj/download', [PrestasiMandiriController::class, 'downloadTemplateLpj'])->name('prestasi-mandiri.template-lpj');
     Route::get('prestasi-mandiri/{prestasi_mandiri}/download-lpj', [PrestasiMandiriController::class, 'downloadUploadedLpj'])->name('prestasi-mandiri.download-lpj');
+    Route::get('prestasi-mandiri/{prestasi_mandiri}/download-file/{type}', [PrestasiMandiriController::class, 'downloadFile'])->name('prestasi-mandiri.download-file');
     Route::resource('prestasi-mandiri', PrestasiMandiriController::class);
 
     // Rekognisi Resource Routes
