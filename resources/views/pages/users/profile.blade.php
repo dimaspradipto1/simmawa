@@ -883,6 +883,15 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Auto-switch tab if hash present in URL (e.g. #profile-ktm)
+            if (window.location.hash) {
+                const triggerTab = document.querySelector(`button[data-bs-target="${window.location.hash}"]`);
+                if (triggerTab && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+                    const tabInstance = bootstrap.Tab.getOrCreateInstance(triggerTab);
+                    tabInstance.show();
+                }
+            }
+
             const photoInput = document.getElementById('photo_profile');
             const previewImg = document.getElementById('avatar-input-preview');
             const cardPreviewImg = document.getElementById('profile-preview-card');
@@ -1219,7 +1228,7 @@
 
         // Tracking Active KTA Card for Multi-Card System
         let currentKtaId = '{{ isset($ktaCards) && count($ktaCards) > 0 ? $ktaCards[0]['id'] : "kta-default" }}';
-        let currentKtaSlug = '{{ isset($ktaCards) && count($ktaCards) > 0 ? Str::slug($ktaCards[0]['singkatan'], "_") : "KTM" }}';
+        let currentKtaSlug = '{{ isset($ktaCards) && count($ktaCards) > 0 ? Str::slug($ktaCards[0]['singkatan'], "_") : "KTA" }}';
 
         function switchKtaCard(cardId, cardSlug) {
             currentKtaId = cardId;

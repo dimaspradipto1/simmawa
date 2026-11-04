@@ -13,7 +13,7 @@ class NewFeaturesTest extends TestCase
         $response = $this->get('/register');
         $response->assertStatus(200);
         $response->assertSee('Daftar Akun Baru');
-        $response->assertSee('Mahasiswa Aktif UIS');
+        $response->assertSee('Nomor WhatsApp / HP');
     }
 
     public function test_student_can_register_with_default_mahasiswa_role(): void
@@ -22,6 +22,7 @@ class NewFeaturesTest extends TestCase
         $response = $this->post('/register', [
             'name'                  => 'Budi Mahasiswa Baru',
             'email'                 => $uniqueEmail,
+            'no_hp'                 => '081234567890',
             'password'              => 'password123',
             'password_confirmation' => 'password123',
         ]);
@@ -270,6 +271,48 @@ class NewFeaturesTest extends TestCase
         $response->assertSee('Apresiasi Kejuaraan');
         $response->assertSee('Penghargaan');
 
+        $admin->delete();
+    }
+
+    public function test_dashboard_displays_kta_summary_for_mahasiswa_and_admin(): void
+    {
+        // 1. Test as Mahasiswa
+        $student = User::firstOrCreate(
+            ['email' => 'mhs_kta_dash_test@uis.ac.id'],
+            [
+                'name' => 'Mhs KTA Dash Test',
+                'password' => bcrypt('password'),
+                'role' => 'mahasiswa',
+                'organisasi' => 'BEM Universitas Ibnu Sina',
+                'jabatan' => 'Anggota',
+                'is_active' => true,
+            ]
+        );
+
+        $this->actingAs($student);
+        $resStudent = $this->get(route('dashboard.index'));
+        $resStudent->assertStatus(200);
+        $resStudent->assertSee('Ringkasan KTA Ormawa Mahasiswa');
+        $resStudent->assertSee('KTA Ormawa Anda');
+
+        // 2. Test as Admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin_kta_dash_test@uis.ac.id'],
+            [
+                'name' => 'Admin KTA Dash Test',
+                'password' => bcrypt('password'),
+                'role' => 'superadmin',
+                'is_active' => true,
+            ]
+        );
+
+        $this->actingAs($admin);
+        $resAdmin = $this->get(route('dashboard.index'));
+        $resAdmin->assertStatus(200);
+        $resAdmin->assertSee('Mahasiswa Ber-KTA');
+        $resAdmin->assertSee('Mahasiswa Pemilik KTA Ormawa');
+
+        $student->delete();
         $admin->delete();
     }
 }

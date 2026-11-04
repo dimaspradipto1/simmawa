@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Institusi;
 use App\Models\Kejuaraan;
+use App\Models\KtaSetting;
+use App\Models\LogoProdi;
 use App\Models\PrestasiBelmawa;
 use App\Models\PrestasiMandiri;
 use App\Models\Rekognisi;
 use App\Models\Sertifikasi;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -208,15 +211,59 @@ class DashboardController extends Controller
             return true;
         });
 
+        // KTA Statistics & Data Mahasiswa
+        $mahasiswaUsers = User::where('role', 'mahasiswa')->get();
+        $totalMahasiswa = $mahasiswaUsers->count();
+
+        // Mahasiswa yang sudah memiliki KTA (terdaftar dalam organisasi)
+        $allMahasiswaBerKta = $mahasiswaUsers->filter(function ($u) {
+            return !empty(trim((string)$u->organisasi));
+        })->values();
+
+        $totalKtaCards = 0;
+        $ormawaDistribution = [];
+        foreach ($allMahasiswaBerKta as $u) {
+            $orgs = is_array($u->organisasi)
+                ? $u->organisasi
+                : array_filter(array_map('trim', explode(',', (string)$u->organisasi)));
+            $totalKtaCards += count($orgs);
+            foreach ($orgs as $org) {
+                if ($org) {
+                    $ormawaDistribution[$org] = ($ormawaDistribution[$org] ?? 0) + 1;
+                }
+            }
+        }
+        arsort($ormawaDistribution);
+
+        // Filtered KTA Mahasiswa jika ada filter program studi
+        $filteredMahasiswaBerKta = $allMahasiswaBerKta;
+        if ($selectedProdi !== 'all') {
+            $filteredMahasiswaBerKta = $allMahasiswaBerKta->filter(function ($u) use ($selectedProdi, $normalizeProdi) {
+                return $normalizeProdi($u->program_studi) === $normalizeProdi($selectedProdi);
+            })->values();
+        }
+
+        $currentUser = Auth::user();
+        $userKtaCards = $currentUser ? LogoProdi::getKtaCardsForUser($currentUser) : [];
+        $userHasKta = !empty(trim((string)($currentUser?->organisasi ?? '')));
+        $userRealKtaCards = array_values(array_filter($userKtaCards, fn($c) => $c['id'] !== 'kta-default'));
+        $ktaSetting = KtaSetting::getSetting();
+
         // 1. Statistics Cards
         $stats = [
-            'mandiri'     => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'mandiri')),
-            'belmawa'     => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'belmawa')),
-            'rekognisi'   => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'rekognisi')),
-            'sertifikasi' => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'sertifikasi')),
-            'kejuaraan'   => $allKejuaraan->count(),
-            'institusi'   => Institusi::query()->count(),
-            'users'       => User::query()->count(),
+            'mandiri'       => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'mandiri')),
+            'belmawa'       => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'belmawa')),
+            'rekognisi'     => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'rekognisi')),
+            'sertifikasi'   => count(array_filter($filteredDataset, fn($r) => $r['type'] === 'sertifikasi')),
+            'kejuaraan'     => $allKejuaraan->count(),
+            'institusi'     => Institusi::query()->count(),
+            'users'         => User::query()->count(),
+            'total_mhs'     => $totalMahasiswa,
+            'kta_mhs'       => $allMahasiswaBerKta->count(),
+            'kta_mhs_filtered' => $filteredMahasiswaBerKta->count(),
+            'total_kta'     => $totalKtaCards,
+            'user_has_kta'  => $userHasKta,
+            'user_kta_count'=> count($userRealKtaCards) ?: count($userKtaCards),
         ];
 
         // 2. Chart per Program Studi
@@ -272,15 +319,21 @@ class DashboardController extends Controller
         }
 
         // Latest Data
-        $latestBelmawa   = $allBelmawa->filter(fn($item) => $isForCurrentStudent($item, 'belmawa'))->sortByDesc('created_at')->take(5);
-        $latestMandiri   = $allMandiri->filter(fn($item) => $isForCurrentStudent($item, 'mandiri'))->sortByDesc('created_at')->take(5);
-        $latestKejuaraan = $allKejuaraan->sortByDesc('created_at')->take(5);
+        $latestBelmawa      = $allBelmawa->filter(fn($item) => $isForCurrentStudent($item, 'belmawa'))->sortByDesc('created_at')->take(5);
+        $latestMandiri      = $allMandiri->filter(fn($item) => $isForCurrentStudent($item, 'mandiri'))->sortByDesc('created_at')->take(5);
+        $latestKejuaraan    = $allKejuaraan->sortByDesc('created_at')->take(5);
+        $latestKtaMahasiswa = $filteredMahasiswaBerKta->sortByDesc('updated_at')->take(6)->values();
 
         return view('layouts.dashboard.index', compact(
             'stats',
             'latestBelmawa',
             'latestMandiri',
             'latestKejuaraan',
+            'latestKtaMahasiswa',
+            'userKtaCards',
+            'userRealKtaCards',
+            'ktaSetting',
+            'ormawaDistribution',
             'availableYears',
             'defaultProdis',
             'selectedTahun',

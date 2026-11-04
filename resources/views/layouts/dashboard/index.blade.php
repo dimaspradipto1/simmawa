@@ -49,7 +49,7 @@
                         @elseif(auth()->user()->role === 'dosenpendamping')
                             Anda bertugas mendampingi dan memverifikasi awal karya & prestasi mahasiswa binaan.
                         @else
-                            Anda dapat mengajukan prestasi mandiri, sertifikasi, serta memantau progres pengajuan Anda.
+                            Anda dapat memantau capaian prestasi, status pengajuan, serta mengakses dan mencetak Kartu Tanda Anggota (KTA) kepengurusan organisasi Anda.
                         @endif
                     </p>
                 </div>
@@ -61,6 +61,83 @@
             </div>
         </div>
     </div>
+
+    <!-- Ringkasan KTA Khusus Role Mahasiswa -->
+    @if(auth()->user()->role === 'mahasiswa')
+    <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-left: 5px solid #059669 !important;">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-success text-white px-3 py-1">
+                            <i class="bi bi-person-vcard-fill me-1"></i> Kartu Tanda Anggota (KTA)
+                        </span>
+                        @if($stats['user_has_kta'])
+                            <span class="badge bg-white text-success border border-success-subtle fw-semibold">
+                                <i class="bi bi-check-circle-fill me-1 text-success"></i> {{ $stats['user_kta_count'] }} Organisasi Terdaftar
+                            </span>
+                        @else
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle fw-semibold">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Belum Memiliki KTA Ormawa
+                            </span>
+                        @endif
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Ringkasan KTA Ormawa Mahasiswa</h5>
+                    <p class="text-secondary small mb-0">
+                        Periode Kepengurusan: <strong>{{ $ktaSetting->tahun_periode ?? '2025/2026' }}</strong> &bull; 
+                        Masa Berlaku: <strong>{{ $ktaSetting->label_masa_berlaku ?? '1 Tahun Kepengurusan' }}</strong>
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('profile.show') }}#profile-ktm" class="btn btn-success btn-sm px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-printer"></i> Buka &amp; Cetak KTA
+                    </a>
+                    <a href="{{ route('profile.show') }}" class="btn btn-outline-success btn-sm px-3 py-2 bg-white shadow-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-pencil-square"></i> Perbarui Data Ormawa
+                    </a>
+                </div>
+            </div>
+
+            @if($stats['user_has_kta'] && count($userRealKtaCards) > 0)
+                <div class="row g-3">
+                    @foreach($userRealKtaCards as $card)
+                        <div class="col-md-6 col-xl-4">
+                            <div class="bg-white p-3 rounded-3 shadow-sm border h-100 d-flex align-items-center gap-3 position-relative overflow-hidden">
+                                <div class="rounded-circle bg-light p-2 border flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                                    <img src="{{ $card['logo_url'] }}" alt="{{ $card['singkatan'] }}" style="max-width: 38px; max-height: 38px; object-fit: contain;">
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle small fw-medium">{{ $card['badge'] }}</span>
+                                        <span class="badge bg-light text-success border small fw-semibold">
+                                            <i class="bi bi-shield-check me-1"></i>Aktif
+                                        </span>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-0 text-truncate" title="{{ $card['nama_org'] }}">{{ $card['singkatan'] }}</h6>
+                                    <small class="text-muted d-block text-truncate mb-1" title="{{ $card['nama_org'] }}">{{ $card['nama_org'] }}</small>
+                                    <span class="badge bg-secondary-subtle text-secondary small text-truncate d-inline-block" style="max-width: 100%;">
+                                        <i class="bi bi-person-badge me-1"></i>{{ $card['jabatan'] }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="alert alert-warning mb-0 border-0 shadow-sm d-flex align-items-center gap-3">
+                    <i class="bi bi-info-circle-fill fs-3 text-warning flex-shrink-0"></i>
+                    <div class="flex-grow-1">
+                        <strong class="d-block text-dark mb-1">Anda belum terdaftar dalam Organisasi Kemahasiswaan (Ormawa)</strong>
+                        <span class="text-secondary small">Lengkapi data organisasi Anda pada profil agar Kartu Tanda Anggota (KTA) resmi kepengurusan BEM, HIMA, atau UKM otomatis diterbitkan dan siap diunduh/dicetak.</span>
+                    </div>
+                    <a href="{{ route('profile.show') }}" class="btn btn-warning btn-sm fw-semibold text-nowrap">
+                        <i class="bi bi-arrow-right me-1"></i> Lengkapi Profil
+                    </a>
+                </div>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <!-- Filter Control Panel Card -->
     <div class="card border-0 shadow-sm mb-4">
@@ -204,6 +281,56 @@
                 </div>
             </div>
         </div>
+
+        <!-- KTA Mahasiswa Card -->
+        @if(auth()->user()->role === 'mahasiswa')
+        <div class="col-xxl-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="p-3 rounded-3 me-3" style="background-color: #d1fae5; color: #059669;">
+                            <i class="bi bi-person-vcard-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">KTA Ormawa Anda</span>
+                            <h3 class="fw-bold text-dark mb-0">
+                                @if($stats['user_has_kta'])
+                                    {{ $stats['user_kta_count'] }} <span class="fs-6 fw-normal text-muted">Kartu</span>
+                                @else
+                                    <span class="fs-5 text-secondary">0 Kartu</span>
+                                @endif
+                            </h3>
+                            <small class="text-success fw-medium" style="font-size: 0.75rem;">
+                                {{ $stats['user_has_kta'] ? 'Anggota Ormawa Aktif' : 'Belum Terdaftar Ormawa' }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @else
+        <div class="col-xxl-3 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="p-3 rounded-3 me-3" style="background-color: #d1fae5; color: #059669;">
+                            <i class="bi bi-person-vcard-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted small text-uppercase fw-semibold d-block">Mahasiswa Ber-KTA</span>
+                            <h3 class="fw-bold text-dark mb-0">
+                                {{ number_format($stats['kta_mhs']) }}
+                                <span class="fs-6 fw-normal text-muted">/ {{ number_format($stats['total_mhs']) }}</span>
+                            </h3>
+                            <small class="text-muted" style="font-size: 0.75rem;">
+                                {{ number_format($stats['total_kta']) }} KTA Ormawa Terdaftar
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Analytics Visualizations Row -->
@@ -345,6 +472,83 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Mahasiswa Pemilik KTA Ormawa (Tampil untuk semua role pengelolaan / manajemen) -->
+            @if(in_array(auth()->user()->role, ['superadmin', 'adminbkak', 'kabid', 'staff', 'pimpinan', 'prodi']))
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
+                    <h6 class="fw-bold text-dark m-0">
+                        <i class="bi bi-person-vcard text-success me-2"></i> Mahasiswa Pemilik KTA Ormawa
+                    </h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            {{ $stats['kta_mhs'] }} Mahasiswa Terdaftar
+                        </span>
+                        @if(in_array(auth()->user()->role, ['superadmin', 'adminbkak']))
+                            <a href="{{ route('kta-setting.index') }}" class="btn btn-sm btn-light border small">Pengaturan KTA</a>
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle m-0" style="font-size: 0.85rem;">
+                            <thead class="bg-light text-secondary">
+                                <tr>
+                                    <th class="ps-3">Mahasiswa</th>
+                                    <th>NIM &amp; Program Studi</th>
+                                    <th>Organisasi (KTA)</th>
+                                    <th>Jabatan</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($latestKtaMahasiswa as $mhs)
+                                    @php
+                                        $userOrgs = is_array($mhs->organisasi)
+                                            ? $mhs->organisasi
+                                            : array_filter(array_map('trim', explode(',', (string)$mhs->organisasi)));
+                                    @endphp
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="{{ $mhs->avatar_url }}" alt="avatar" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;">
+                                                <div>
+                                                    <div class="fw-bold text-dark">{{ $mhs->name }}</div>
+                                                    <small class="text-muted">{{ $mhs->email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-dark">{{ $mhs->nim ?: '-' }}</div>
+                                            <small class="text-muted">{{ $mhs->program_studi ?: 'Universitas Ibnu Sina' }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach($userOrgs as $org)
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;">
+                                                        {{ $org }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">{{ $mhs->jabatan ?: 'Anggota' }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Aktif</span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">Belum ada mahasiswa yang terdaftar dengan KTA Ormawa.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Right Side: Quick Action & Profile Overview (4 cols) -->
@@ -367,17 +571,52 @@
                 </div>
             </div>
 
+            <!-- Sebaran KTA per Ormawa (Untuk Role Manajemen) -->
+            @if(in_array(auth()->user()->role, ['superadmin', 'adminbkak', 'kabid', 'staff', 'pimpinan', 'prodi']) && count($ormawaDistribution) > 0)
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0">
+                    <h6 class="fw-bold text-dark m-0">
+                        <i class="bi bi-diagram-3 text-primary me-2"></i> Sebaran Anggota KTA Ormawa
+                    </h6>
+                    <span class="badge bg-light text-muted border small">{{ count($ormawaDistribution) }} Ormawa</span>
+                </div>
+                <div class="card-body p-3">
+                    <ul class="list-group list-group-flush">
+                        @foreach(array_slice($ormawaDistribution, 0, 5, true) as $orgName => $orgCount)
+                            <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center border-0">
+                                <div class="text-truncate me-2">
+                                    <i class="bi bi-patch-check-fill text-success me-1"></i>
+                                    <span class="fw-semibold text-dark small" title="{{ $orgName }}">{{ $orgName }}</span>
+                                </div>
+                                <span class="badge bg-success rounded-pill px-2 py-1 small">{{ $orgCount }} KTA</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            @endif
+
             <!-- Quick Action Shortcuts -->
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <h6 class="fw-bold text-dark mb-3"><i class="bi bi-lightning-charge text-warning me-2"></i> Akses Cepat Menu</h6>
                     <div class="d-grid gap-2">
+                        @if(auth()->user()->role === 'mahasiswa')
+                        <a href="{{ route('profile.show') }}#profile-ktm" class="btn btn-light border text-start py-2">
+                            <i class="bi bi-person-vcard text-success me-2"></i> Akses Kartu Tanda Anggota (KTA)
+                        </a>
+                        @endif
                         <a href="{{ route('prestasi-mandiri.create') }}" class="btn btn-light border text-start py-2">
                             <i class="bi bi-plus-circle text-primary me-2"></i> Tambah Prestasi Mandiri
                         </a>
                         <a href="{{ route('prestasi-belmawa.index') }}" class="btn btn-light border text-start py-2">
                             <i class="bi bi-award text-warning me-2"></i> Lihat Prestasi Belmawa
                         </a>
+                        @if(in_array(auth()->user()->role, ['superadmin', 'adminbkak']))
+                        <a href="{{ route('kta-setting.index') }}" class="btn btn-light border text-start py-2">
+                            <i class="bi bi-card-heading text-success me-2"></i> Pengaturan KTA
+                        </a>
+                        @endif
                         @if(in_array(auth()->user()->role, ['superadmin', 'adminbkak', 'kabid', 'staff', 'pimpinan', 'prodi']))
                         <a href="{{ route('kejuaraan.create') }}" class="btn btn-light border text-start py-2">
                             <i class="bi bi-flag text-success me-2"></i> Tambah Kejuaraan / Ajang
