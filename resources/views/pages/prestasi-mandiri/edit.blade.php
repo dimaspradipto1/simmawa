@@ -25,6 +25,11 @@
           <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
             <i class="bi bi-google me-1"></i> Penyimpanan Google Drive Aktif
           </span>
+          @if(auth()->check() && in_array(auth()->user()->role, ['superadmin', 'adminbkak']))
+            <a href="{{ route('google-drive.auth') }}" class="btn btn-sm btn-primary py-0 px-2 fw-medium" style="font-size: 0.75rem;">
+              <i class="bi bi-google me-1"></i> Hubungkan Ulang Google Drive
+            </a>
+          @endif
         @else
           <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1">
             <i class="bi bi-exclamation-circle me-1"></i> Google Drive Belum Terhubung (Penyimpanan Lokal Aktif)
