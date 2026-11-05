@@ -15,9 +15,11 @@ use App\Http\Controllers\TemplateLpjController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KtaSettingController;
 use App\Http\Controllers\DatabaseBackupController;
+use App\Http\Controllers\GoogleDriveAuthController;
 use Illuminate\Support\Facades\Route;
 
-
+// Google Drive OAuth Callback
+Route::get('/google-drive/callback', [GoogleDriveAuthController::class, 'callback'])->name('google-drive.callback');
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/', 'login')->name('login')->middleware('guest');
@@ -90,4 +92,8 @@ Route::middleware(['auth', 'checkrole'])->group(function () {
     // Template LPJ Resource Routes
     Route::get('template-lpj/{template_lpj}/download', [TemplateLpjController::class, 'download'])->name('template-lpj.download');
     Route::resource('template-lpj', TemplateLpjController::class);
+
+    // Google Drive Integration Routes
+    Route::get('/google-drive/auth', [GoogleDriveAuthController::class, 'connect'])->name('google-drive.auth');
+    Route::get('/google-drive/status', [GoogleDriveAuthController::class, 'status'])->name('google-drive.status');
 });

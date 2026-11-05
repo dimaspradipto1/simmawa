@@ -103,8 +103,9 @@
                     <label class="form-label small fw-bold text-dark mb-1">Dokumen Sertifikat</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small text-break">
                         @if($prestasiMandiri->file_dokumen_sertifikat)
+                            @php $isDrive = str_contains($prestasiMandiri->file_dokumen_sertifikat, 'drive.google.com'); @endphp
                             <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'sertifikat']) }}" class="btn btn-sm btn-outline-primary py-1 px-3 d-inline-flex align-items-center" target="_blank">
-                                <i class="bi bi-file-earmark-check me-1"></i> Unduh Berkas Sertifikat
+                                <i class="bi {{ $isDrive ? 'bi-google' : 'bi-file-earmark-check' }} me-1"></i> {{ $isDrive ? 'Buka di Google Drive' : 'Unduh Berkas Sertifikat' }}
                             </a>
                         @elseif($prestasiMandiri->link_dokumen_sertifikat)
                             <a href="{{ $prestasiMandiri->link_dokumen_sertifikat }}" target="_blank" class="text-primary text-decoration-none">
@@ -151,8 +152,9 @@
                     <label class="form-label small fw-bold text-dark mb-1">Berkas File LPJ</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small">
                         @if($prestasiMandiri->file_dokumen_lpj)
+                            @php $isDrive = str_contains($prestasiMandiri->file_dokumen_lpj, 'drive.google.com'); @endphp
                             <a href="{{ route('prestasi-mandiri.download-lpj', $prestasiMandiri->id) }}" class="btn btn-sm btn-outline-success py-1 px-3 d-inline-flex align-items-center" target="_blank">
-                                <i class="bi bi-download me-1"></i> Unduh Berkas LPJ
+                                <i class="bi {{ $isDrive ? 'bi-google' : 'bi-download' }} me-1"></i> {{ $isDrive ? 'Buka di Google Drive' : 'Unduh Berkas LPJ' }}
                             </a>
                         @else
                             <span class="text-muted">-</span>
@@ -172,8 +174,9 @@
                     <label class="form-label small fw-bold text-dark mb-1">KTM (Kartu Tanda Mahasiswa)</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small">
                         @if($prestasiMandiri->file_ktm)
+                            @php $isDrive = str_contains($prestasiMandiri->file_ktm, 'drive.google.com'); @endphp
                             <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'ktm']) }}" class="btn btn-sm btn-outline-primary py-1 px-3 d-inline-flex align-items-center" target="_blank">
-                                <i class="bi bi-person-badge me-1"></i> Unduh KTM
+                                <i class="bi {{ $isDrive ? 'bi-google' : 'bi-person-badge' }} me-1"></i> {{ $isDrive ? 'Buka di Google Drive' : 'Unduh KTM' }}
                             </a>
                         @else
                             <span class="text-muted">-</span>
@@ -185,8 +188,9 @@
                     <label class="form-label small fw-bold text-dark mb-1">Surat Pengajuan Reward Prestasi</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small">
                         @if($prestasiMandiri->file_pengajuan_reward)
+                            @php $isDrive = str_contains($prestasiMandiri->file_pengajuan_reward, 'drive.google.com'); @endphp
                             <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'reward']) }}" class="btn btn-sm btn-outline-success py-1 px-3 d-inline-flex align-items-center" target="_blank">
-                                <i class="bi bi-file-earmark-arrow-up me-1"></i> Unduh Surat Reward
+                                <i class="bi {{ $isDrive ? 'bi-google' : 'bi-file-earmark-arrow-up' }} me-1"></i> {{ $isDrive ? 'Buka di Google Drive' : 'Unduh Surat Reward' }}
                             </a>
                         @else
                             <span class="text-muted">-</span>
@@ -198,8 +202,9 @@
                     <label class="form-label small fw-bold text-dark mb-1">Surat Tugas WR III / WD I</label>
                     <div class="p-2 rounded bg-light border-0 text-dark small">
                         @if($prestasiMandiri->file_surat_tugas)
+                            @php $isDrive = str_contains($prestasiMandiri->file_surat_tugas, 'drive.google.com'); @endphp
                             <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'surat-tugas']) }}" class="btn btn-sm btn-outline-info py-1 px-3 d-inline-flex align-items-center" target="_blank">
-                                <i class="bi bi-file-earmark-check me-1"></i> Unduh Surat Tugas
+                                <i class="bi {{ $isDrive ? 'bi-google' : 'bi-file-earmark-check' }} me-1"></i> {{ $isDrive ? 'Buka di Google Drive' : 'Unduh Surat Tugas' }}
                             </a>
                         @else
                             <span class="text-muted">-</span>

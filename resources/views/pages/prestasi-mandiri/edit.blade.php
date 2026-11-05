@@ -17,9 +17,25 @@
   <!-- SIMKATMAWA Soft Blue Header Banner -->
   <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);">
     <div class="card-body p-4">
-      <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-2">
-        Edit Prestasi
-      </span>
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
+          Edit Prestasi
+        </span>
+        @if(!empty($isDriveReady) && $isDriveReady)
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+            <i class="bi bi-google me-1"></i> Penyimpanan Google Drive Aktif
+          </span>
+        @else
+          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1">
+            <i class="bi bi-exclamation-circle me-1"></i> Google Drive Belum Terhubung (Penyimpanan Lokal Aktif)
+          </span>
+          @if(auth()->check() && in_array(auth()->user()->role, ['superadmin', 'adminbkak']))
+            <a href="{{ route('google-drive.auth') }}" class="btn btn-sm btn-primary py-0 px-2 fw-medium" style="font-size: 0.75rem;">
+              <i class="bi bi-google me-1"></i> Hubungkan Google Drive
+            </a>
+          @endif
+        @endif
+      </div>
       <h5 class="fw-bold text-dark mb-1">Form prestasi mandiri terpadu</h5>
       <p class="text-secondary small mb-3">Data mahasiswa dan dosen kini diisi langsung di form ini, sehingga tidak perlu berpindah halaman setelah data prestasi tersimpan.</p>
 
@@ -210,12 +226,14 @@
           <div class="col-md-6">
             <label for="file_dokumen_sertifikat" class="form-label fw-medium">Upload File Sertifikat<span class="text-danger">*</span></label>
             @if($prestasiMandiri->file_dokumen_sertifikat)
+              @php $isDrive = str_contains($prestasiMandiri->file_dokumen_sertifikat, 'drive.google.com'); @endphp
               <div class="mb-1 d-flex align-items-center justify-content-between p-1 px-2 bg-light rounded border">
                 <span class="small text-truncate text-secondary" style="max-width: 250px;">
-                  <i class="bi bi-file-earmark-check text-success me-1"></i> {{ basename($prestasiMandiri->file_dokumen_sertifikat) }}
+                  <i class="bi {{ $isDrive ? 'bi-google text-success' : 'bi-file-earmark-check text-success' }} me-1"></i>
+                  {{ $isDrive ? 'Berkas Google Drive' : basename($prestasiMandiri->file_dokumen_sertifikat) }}
                 </span>
                 <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'sertifikat']) }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
-                  <i class="bi bi-download"></i> Unduh
+                  <i class="bi {{ $isDrive ? 'bi-box-arrow-up-right' : 'bi-download' }}"></i> {{ $isDrive ? 'Buka Drive' : 'Unduh' }}
                 </a>
               </div>
             @elseif($prestasiMandiri->link_dokumen_sertifikat)
@@ -262,12 +280,14 @@
           <div class="col-md-6">
             <label for="file_dokumen_lpj" class="form-label fw-medium">Upload File LPJ<span class="text-danger">*</span></label>
             @if($prestasiMandiri->file_dokumen_lpj)
+              @php $isDrive = str_contains($prestasiMandiri->file_dokumen_lpj, 'drive.google.com'); @endphp
               <div class="mb-1 d-flex align-items-center justify-content-between p-1 px-2 bg-light rounded border">
                 <span class="small text-truncate text-secondary" style="max-width: 250px;">
-                  <i class="bi bi-file-earmark-check text-success me-1"></i> {{ basename($prestasiMandiri->file_dokumen_lpj) }}
+                  <i class="bi {{ $isDrive ? 'bi-google text-success' : 'bi-file-earmark-check text-success' }} me-1"></i>
+                  {{ $isDrive ? 'Berkas Google Drive' : basename($prestasiMandiri->file_dokumen_lpj) }}
                 </span>
                 <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'lpj']) }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
-                  <i class="bi bi-download"></i> Unduh
+                  <i class="bi {{ $isDrive ? 'bi-box-arrow-up-right' : 'bi-download' }}"></i> {{ $isDrive ? 'Buka Drive' : 'Unduh' }}
                 </a>
               </div>
             @endif
@@ -290,12 +310,14 @@
           <div class="col-md-6">
             <label for="file_ktm" class="form-label fw-medium">Upload KTM (Kartu Tanda Mahasiswa)<span class="text-danger">*</span></label>
             @if($prestasiMandiri->file_ktm)
+              @php $isDrive = str_contains($prestasiMandiri->file_ktm, 'drive.google.com'); @endphp
               <div class="mb-1 d-flex align-items-center justify-content-between p-1 px-2 bg-light rounded border">
                 <span class="small text-truncate text-secondary" style="max-width: 250px;">
-                  <i class="bi bi-file-earmark-check text-success me-1"></i> {{ basename($prestasiMandiri->file_ktm) }}
+                  <i class="bi {{ $isDrive ? 'bi-google text-success' : 'bi-file-earmark-check text-success' }} me-1"></i>
+                  {{ $isDrive ? 'Berkas Google Drive' : basename($prestasiMandiri->file_ktm) }}
                 </span>
                 <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'ktm']) }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
-                  <i class="bi bi-download"></i> Unduh
+                  <i class="bi {{ $isDrive ? 'bi-box-arrow-up-right' : 'bi-download' }}"></i> {{ $isDrive ? 'Buka Drive' : 'Unduh' }}
                 </a>
               </div>
             @endif
@@ -309,12 +331,14 @@
           <div class="col-md-6">
             <label for="file_pengajuan_reward" class="form-label fw-medium">Upload Surat Pengajuan Reward Prestasi<span class="text-danger">*</span></label>
             @if($prestasiMandiri->file_pengajuan_reward)
+              @php $isDrive = str_contains($prestasiMandiri->file_pengajuan_reward, 'drive.google.com'); @endphp
               <div class="mb-1 d-flex align-items-center justify-content-between p-1 px-2 bg-light rounded border">
                 <span class="small text-truncate text-secondary" style="max-width: 250px;">
-                  <i class="bi bi-file-earmark-check text-success me-1"></i> {{ basename($prestasiMandiri->file_pengajuan_reward) }}
+                  <i class="bi {{ $isDrive ? 'bi-google text-success' : 'bi-file-earmark-check text-success' }} me-1"></i>
+                  {{ $isDrive ? 'Berkas Google Drive' : basename($prestasiMandiri->file_pengajuan_reward) }}
                 </span>
                 <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'reward']) }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
-                  <i class="bi bi-download"></i> Unduh
+                  <i class="bi {{ $isDrive ? 'bi-box-arrow-up-right' : 'bi-download' }}"></i> {{ $isDrive ? 'Buka Drive' : 'Unduh' }}
                 </a>
               </div>
             @endif
@@ -328,12 +352,14 @@
           <div class="col-md-6">
             <label for="file_surat_tugas" class="form-label fw-medium">Upload Surat Tugas dari WR III / WD I<span class="text-danger">*</span></label>
             @if($prestasiMandiri->file_surat_tugas)
+              @php $isDrive = str_contains($prestasiMandiri->file_surat_tugas, 'drive.google.com'); @endphp
               <div class="mb-1 d-flex align-items-center justify-content-between p-1 px-2 bg-light rounded border">
                 <span class="small text-truncate text-secondary" style="max-width: 250px;">
-                  <i class="bi bi-file-earmark-check text-success me-1"></i> {{ basename($prestasiMandiri->file_surat_tugas) }}
+                  <i class="bi {{ $isDrive ? 'bi-google text-success' : 'bi-file-earmark-check text-success' }} me-1"></i>
+                  {{ $isDrive ? 'Berkas Google Drive' : basename($prestasiMandiri->file_surat_tugas) }}
                 </span>
                 <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'surat-tugas']) }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
-                  <i class="bi bi-download"></i> Unduh
+                  <i class="bi {{ $isDrive ? 'bi-box-arrow-up-right' : 'bi-download' }}"></i> {{ $isDrive ? 'Buka Drive' : 'Unduh' }}
                 </a>
               </div>
             @endif

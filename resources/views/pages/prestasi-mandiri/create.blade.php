@@ -17,9 +17,25 @@
   <!-- SIMKATMAWA Soft Blue Header Banner -->
   <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);">
     <div class="card-body p-4">
-      <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-2">
-        Tambah Prestasi
-      </span>
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
+          Tambah Prestasi
+        </span>
+        @if(!empty($isDriveReady) && $isDriveReady)
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+            <i class="bi bi-google me-1"></i> Penyimpanan Google Drive Aktif
+          </span>
+        @else
+          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1">
+            <i class="bi bi-exclamation-circle me-1"></i> Google Drive Belum Terhubung (Penyimpanan Lokal Aktif)
+          </span>
+          @if(auth()->check() && in_array(auth()->user()->role, ['superadmin', 'adminbkak']))
+            <a href="{{ route('google-drive.auth') }}" class="btn btn-sm btn-primary py-0 px-2 fw-medium" style="font-size: 0.75rem;">
+              <i class="bi bi-google me-1"></i> Hubungkan Google Drive
+            </a>
+          @endif
+        @endif
+      </div>
       <h5 class="fw-bold text-dark mb-1">Form prestasi mandiri terpadu</h5>
       <p class="text-secondary small mb-3">Data mahasiswa dan dosen kini diisi langsung di form ini, sehingga tidak perlu berpindah halaman setelah data prestasi tersimpan.</p>
 

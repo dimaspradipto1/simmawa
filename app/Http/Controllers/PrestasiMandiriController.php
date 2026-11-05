@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\DataTables\PrestasiMandiriDataTable;
 use App\Models\PrestasiMandiri;
 use App\Models\TemplateLpj;
+use App\Services\GoogleDriveService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PrestasiMandiriController extends Controller
 {
+    public function __construct(
+        protected GoogleDriveService $driveService
+    ) {}
     /**
      * Helper to get dropdown options matching SIMKATMAWA specs
      */
@@ -113,7 +117,8 @@ class PrestasiMandiriController extends Controller
         $prestasiMandiri = new PrestasiMandiri();
         $activeTemplateLpj = TemplateLpj::getActiveTemplate('Prestasi Mandiri');
         $activeTemplatesLpj = TemplateLpj::getActiveTemplates('Prestasi Mandiri');
-        return view('pages.prestasi-mandiri.create', compact('options', 'prestasiMandiri', 'activeTemplateLpj', 'activeTemplatesLpj'));
+        $isDriveReady = $this->driveService->isConfigured();
+        return view('pages.prestasi-mandiri.create', compact('options', 'prestasiMandiri', 'activeTemplateLpj', 'activeTemplatesLpj', 'isDriveReady'));
     }
 
     /**
@@ -190,41 +195,32 @@ class PrestasiMandiriController extends Controller
 
         if ($request->hasFile('file_dokumen_sertifikat')) {
             $file = $request->file('file_dokumen_sertifikat');
-            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
-        }
-
-        if ($request->hasFile('file_dokumen_sertifikat')) {
-            if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
-                Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
-            }
-            $file = $request->file('file_dokumen_sertifikat');
-            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_FILE_SERTIFIKAT', 'sertifikat');
+            $validated['file_dokumen_sertifikat'] = $upload['url'];
         }
 
         if ($request->hasFile('file_dokumen_lpj')) {
             $file = $request->file('file_dokumen_lpj');
-            $storedName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_dokumen_lpj'] = $file->storeAs('dokumen_lpj', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_FILE_LPJ', 'dokumen_lpj');
+            $validated['file_dokumen_lpj'] = $upload['url'];
         }
 
         if ($request->hasFile('file_pengajuan_reward')) {
             $file = $request->file('file_pengajuan_reward');
-            $storedName = time() . '_reward_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_pengajuan_reward'] = $file->storeAs('surat_reward', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_SURAT_PENGAJUAN_REWARD_PRESTASI', 'surat_reward');
+            $validated['file_pengajuan_reward'] = $upload['url'];
         }
 
         if ($request->hasFile('file_ktm')) {
             $file = $request->file('file_ktm');
-            $storedName = time() . '_ktm_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_ktm'] = $file->storeAs('ktm', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_KTM', 'ktm');
+            $validated['file_ktm'] = $upload['url'];
         }
 
         if ($request->hasFile('file_surat_tugas')) {
             $file = $request->file('file_surat_tugas');
-            $storedName = time() . '_surattugas_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_surat_tugas'] = $file->storeAs('surat_tugas', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_SURAT_WRIII_ATAU_WDI', 'surat_tugas');
+            $validated['file_surat_tugas'] = $upload['url'];
         }
 
         $validated['data_mahasiswa'] = $mahasiswa;
@@ -284,7 +280,8 @@ class PrestasiMandiriController extends Controller
         $options = $this->getFormOptions();
         $activeTemplateLpj = TemplateLpj::getActiveTemplate('Prestasi Mandiri');
         $activeTemplatesLpj = TemplateLpj::getActiveTemplates('Prestasi Mandiri');
-        return view('pages.prestasi-mandiri.edit', compact('options', 'prestasiMandiri', 'activeTemplateLpj', 'activeTemplatesLpj'));
+        $isDriveReady = $this->driveService->isConfigured();
+        return view('pages.prestasi-mandiri.edit', compact('options', 'prestasiMandiri', 'activeTemplateLpj', 'activeTemplatesLpj', 'isDriveReady'));
     }
 
     /**
@@ -357,57 +354,48 @@ class PrestasiMandiriController extends Controller
         }
 
         if ($request->hasFile('file_dokumen_sertifikat')) {
-            $file = $request->file('file_dokumen_sertifikat');
-            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
-        }
-
-        if ($request->hasFile('file_dokumen_sertifikat')) {
-            if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
-                Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
+            if ($prestasiMandiri->file_dokumen_sertifikat) {
+                $this->driveService->deleteFile($prestasiMandiri->file_dokumen_sertifikat);
             }
             $file = $request->file('file_dokumen_sertifikat');
-            $storedName = time() . '_sertifikat_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_dokumen_sertifikat'] = $file->storeAs('sertifikat', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_FILE_SERTIFIKAT', 'sertifikat');
+            $validated['file_dokumen_sertifikat'] = $upload['url'];
         }
 
         if ($request->hasFile('file_dokumen_lpj')) {
-            if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
-            Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
-        }
-        if ($prestasiMandiri->file_dokumen_lpj && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_lpj)) {
-                Storage::disk('public')->delete($prestasiMandiri->file_dokumen_lpj);
+            if ($prestasiMandiri->file_dokumen_lpj) {
+                $this->driveService->deleteFile($prestasiMandiri->file_dokumen_lpj);
             }
             $file = $request->file('file_dokumen_lpj');
-            $storedName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_dokumen_lpj'] = $file->storeAs('dokumen_lpj', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_FILE_LPJ', 'dokumen_lpj');
+            $validated['file_dokumen_lpj'] = $upload['url'];
         }
 
         if ($request->hasFile('file_pengajuan_reward')) {
-            if ($prestasiMandiri->file_pengajuan_reward && Storage::disk('public')->exists($prestasiMandiri->file_pengajuan_reward)) {
-                Storage::disk('public')->delete($prestasiMandiri->file_pengajuan_reward);
+            if ($prestasiMandiri->file_pengajuan_reward) {
+                $this->driveService->deleteFile($prestasiMandiri->file_pengajuan_reward);
             }
             $file = $request->file('file_pengajuan_reward');
-            $storedName = time() . '_reward_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_pengajuan_reward'] = $file->storeAs('surat_reward', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_SURAT_PENGAJUAN_REWARD_PRESTASI', 'surat_reward');
+            $validated['file_pengajuan_reward'] = $upload['url'];
         }
 
         if ($request->hasFile('file_ktm')) {
-            if ($prestasiMandiri->file_ktm && Storage::disk('public')->exists($prestasiMandiri->file_ktm)) {
-                Storage::disk('public')->delete($prestasiMandiri->file_ktm);
+            if ($prestasiMandiri->file_ktm) {
+                $this->driveService->deleteFile($prestasiMandiri->file_ktm);
             }
             $file = $request->file('file_ktm');
-            $storedName = time() . '_ktm_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_ktm'] = $file->storeAs('ktm', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_KTM', 'ktm');
+            $validated['file_ktm'] = $upload['url'];
         }
 
         if ($request->hasFile('file_surat_tugas')) {
-            if ($prestasiMandiri->file_surat_tugas && Storage::disk('public')->exists($prestasiMandiri->file_surat_tugas)) {
-                Storage::disk('public')->delete($prestasiMandiri->file_surat_tugas);
+            if ($prestasiMandiri->file_surat_tugas) {
+                $this->driveService->deleteFile($prestasiMandiri->file_surat_tugas);
             }
             $file = $request->file('file_surat_tugas');
-            $storedName = time() . '_surattugas_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-            $validated['file_surat_tugas'] = $file->storeAs('surat_tugas', $storedName, 'public');
+            $upload = $this->driveService->upload($file, 'GOOGLE_DRIVE_UPLOAD_SURAT_WRIII_ATAU_WDI', 'surat_tugas');
+            $validated['file_surat_tugas'] = $upload['url'];
         }
 
         $validated['data_mahasiswa'] = $mahasiswa;
@@ -429,20 +417,20 @@ class PrestasiMandiriController extends Controller
     {
         $this->authorizeStudentAccess($prestasiMandiri);
 
-        if ($prestasiMandiri->file_dokumen_sertifikat && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_sertifikat)) {
-            Storage::disk('public')->delete($prestasiMandiri->file_dokumen_sertifikat);
+        if ($prestasiMandiri->file_dokumen_sertifikat) {
+            $this->driveService->deleteFile($prestasiMandiri->file_dokumen_sertifikat);
         }
-        if ($prestasiMandiri->file_dokumen_lpj && Storage::disk('public')->exists($prestasiMandiri->file_dokumen_lpj)) {
-            Storage::disk('public')->delete($prestasiMandiri->file_dokumen_lpj);
+        if ($prestasiMandiri->file_dokumen_lpj) {
+            $this->driveService->deleteFile($prestasiMandiri->file_dokumen_lpj);
         }
-        if ($prestasiMandiri->file_pengajuan_reward && Storage::disk('public')->exists($prestasiMandiri->file_pengajuan_reward)) {
-            Storage::disk('public')->delete($prestasiMandiri->file_pengajuan_reward);
+        if ($prestasiMandiri->file_pengajuan_reward) {
+            $this->driveService->deleteFile($prestasiMandiri->file_pengajuan_reward);
         }
-        if ($prestasiMandiri->file_ktm && Storage::disk('public')->exists($prestasiMandiri->file_ktm)) {
-            Storage::disk('public')->delete($prestasiMandiri->file_ktm);
+        if ($prestasiMandiri->file_ktm) {
+            $this->driveService->deleteFile($prestasiMandiri->file_ktm);
         }
-        if ($prestasiMandiri->file_surat_tugas && Storage::disk('public')->exists($prestasiMandiri->file_surat_tugas)) {
-            Storage::disk('public')->delete($prestasiMandiri->file_surat_tugas);
+        if ($prestasiMandiri->file_surat_tugas) {
+            $this->driveService->deleteFile($prestasiMandiri->file_surat_tugas);
         }
 
         $prestasiMandiri->delete();
@@ -479,8 +467,19 @@ class PrestasiMandiriController extends Controller
             default       => null,
         };
 
-        if ($filePath && Storage::disk('public')->exists($filePath)) {
-            return Storage::disk('public')->download($filePath);
+        if ($filePath) {
+            if (str_starts_with($filePath, 'http://') || str_starts_with($filePath, 'https://')) {
+                return redirect()->away($filePath);
+            }
+
+            if (Storage::disk('public')->exists($filePath)) {
+                return Storage::disk('public')->download($filePath);
+            }
+
+            $publicPath = public_path($filePath);
+            if (file_exists($publicPath)) {
+                return response()->download($publicPath);
+            }
         }
 
         abort(404, 'Berkas dokumen tidak ditemukan.');
