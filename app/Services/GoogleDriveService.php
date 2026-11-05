@@ -25,8 +25,11 @@ class GoogleDriveService
         $clientId = env('GOOGLE_DRIVE_CLIENT_ID');
         $clientSecret = env('GOOGLE_DRIVE_CLIENT_SECRET');
         $refreshToken = env('GOOGLE_DRIVE_REFRESH_TOKEN');
+        $accessToken = env('GOOGLE_DRIVE_ACCESS_TOKEN');
 
-        return !empty($clientId) && !empty($clientSecret) && !empty($refreshToken) && $refreshToken !== 'xxx';
+        $hasToken = (!empty($refreshToken) && $refreshToken !== 'xxx') || (!empty($accessToken) && $accessToken !== 'xxx');
+
+        return !empty($clientId) && !empty($clientSecret) && $hasToken;
     }
 
     /**
@@ -46,10 +49,19 @@ class GoogleDriveService
         $client->setAccessType('offline');
         $client->setPrompt('consent');
 
+        $accessToken = env('GOOGLE_DRIVE_ACCESS_TOKEN');
         $refreshToken = env('GOOGLE_DRIVE_REFRESH_TOKEN');
-        if (!empty($refreshToken) && $refreshToken !== 'xxx') {
+
+        if (!empty($accessToken) && $accessToken !== 'xxx') {
+            $client->setAccessToken($accessToken);
+        }
+
+        if ($client->isAccessTokenExpired() && !empty($refreshToken) && $refreshToken !== 'xxx') {
             try {
-                $client->fetchAccessTokenWithRefreshToken($refreshToken);
+                $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+                if (!empty($newToken['access_token'])) {
+                    static::updateEnvKey('GOOGLE_DRIVE_ACCESS_TOKEN', $newToken['access_token']);
+                }
             } catch (Throwable $e) {
                 Log::error('Google Drive fetchAccessToken error: ' . $e->getMessage());
             }
