@@ -16,7 +16,8 @@ class GoogleDriveAuthCommand extends Command
     protected $signature = 'drive:auth 
                             {--code= : Google OAuth authorization code}
                             {--check : Check live Google Drive connection and folder access}
-                            {--test-upload : Perform end-to-end upload & delete test to Google Drive}';
+                            {--test-upload : Perform end-to-end upload & delete test to Google Drive}
+                            {--sync-local : Sync all existing local prestasi mandiri files to Google Drive}';
 
     /**
      * The console command description.
@@ -116,6 +117,47 @@ class GoogleDriveAuthCommand extends Command
                 $this->error('Gagal terhubung ke Google Drive API: ' . $e->getMessage());
                 return Command::FAILURE;
             }
+        }
+
+        if ($this->option('sync-local')) {
+            $this->info('Memulai sinkronisasi berkas lokal Prestasi Mandiri ke Google Drive...');
+            $records = \App\Models\PrestasiMandiri::all();
+            $count = 0;
+
+            foreach ($records as $record) {
+                $updated = false;
+
+                $fileMap = [
+                    'file_dokumen_sertifikat' => 'GOOGLE_DRIVE_UPLOAD_FILE_SERTIFIKAT',
+                    'file_dokumen_lpj'        => 'GOOGLE_DRIVE_UPLOAD_FILE_LPJ',
+                    'file_ktm'                => 'GOOGLE_DRIVE_UPLOAD_KTM',
+                    'file_pengajuan_reward'   => 'GOOGLE_DRIVE_UPLOAD_SURAT_PENGAJUAN_REWARD_PRESTASI',
+                    'file_surat_tugas'        => 'GOOGLE_DRIVE_UPLOAD_SURAT_WRIII_ATAU_WDI',
+                ];
+
+                foreach ($fileMap as $field => $envKey) {
+                    $val = $record->{$field};
+                    if (!empty($val) && !str_starts_with($val, 'http')) {
+                        $this->line("Mengunggah {$field}: {$val}...");
+                        $res = $driveService->upload($val, $envKey, dirname($val));
+                        if ($res['drive']) {
+                            $record->{$field} = $res['url'];
+                            $updated = true;
+                            $this->info(" -> Berhasil diunggah ke Google Drive: {$res['url']}");
+                        } else {
+                            $this->warn(" -> Gagal diunggah ke Google Drive, tetap menggunakan berkas lokal.");
+                        }
+                    }
+                }
+
+                if ($updated) {
+                    $record->save();
+                    $count++;
+                }
+            }
+
+            $this->info("Selesai! {$count} data Prestasi Mandiri berhasil disinkronkan ke Google Drive.");
+            return Command::SUCCESS;
         }
 
         if ($this->option('test-upload')) {

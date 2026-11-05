@@ -33,6 +33,27 @@ class GoogleDriveService
     }
 
     /**
+     * Get CA certificate bundle path for SSL verification on Windows.
+     */
+    public static function getCaBundlePath(): string|bool
+    {
+        $candidates = [
+            'C:/laragon/etc/ssl/cacert.pem',
+            ini_get('curl.cainfo'),
+            ini_get('openssl.cafile'),
+            'C:/laragon/bin/python/python-3.10/Lib/site-packages/certifi/cacert.pem',
+        ];
+
+        foreach ($candidates as $path) {
+            if (!empty($path) && file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Initialize Google Client.
      */
     public function getClient(): GoogleClient
@@ -41,7 +62,13 @@ class GoogleDriveService
             return $this->client;
         }
 
+        $caPath = self::getCaBundlePath();
+        $guzzle = new \GuzzleHttp\Client([
+            'verify' => $caPath,
+        ]);
+
         $client = new GoogleClient();
+        $client->setHttpClient($guzzle);
         $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
         $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
         $client->setRedirectUri(env('GOOGLE_REDIRECT_URI', url('/google-drive/callback')));
@@ -162,7 +189,16 @@ class GoogleDriveService
                     'parents' => [$folderId],
                 ]);
 
-                $filePath = ($file instanceof UploadedFile) ? $file->getRealPath() : $file;
+                if ($file instanceof UploadedFile) {
+                    $filePath = $file->getRealPath();
+                } elseif (file_exists($file)) {
+                    $filePath = $file;
+                } elseif (Storage::disk('public')->exists($file)) {
+                    $filePath = Storage::disk('public')->path($file);
+                } else {
+                    $filePath = $file;
+                }
+
                 $content = File::get($filePath);
                 $mimeType = ($file instanceof UploadedFile)
                     ? ($file->getClientMimeType() ?: 'application/octet-stream')
