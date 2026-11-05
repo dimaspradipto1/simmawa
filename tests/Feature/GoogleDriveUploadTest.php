@@ -132,4 +132,59 @@ class GoogleDriveUploadTest extends TestCase
         // Clean up
         $record->delete();
     }
+
+    public function test_google_drive_naming_format_is_user_date_filename()
+    {
+        $service = app(GoogleDriveService::class);
+        $res = $service->formatFileName('sertifikat_lomba.pdf', 'Budi Santoso', '2026-11-05');
+
+        $this->assertEquals('Budi_Santoso_2026-11-05_sertifikat_lomba.pdf', $res);
+    }
+
+    public function test_destroy_deletes_files_via_drive_service()
+    {
+        $mockService = \Mockery::mock(GoogleDriveService::class);
+        $mockService->shouldReceive('deleteFile')
+            ->times(5)
+            ->andReturn(true);
+        $mockService->shouldReceive('isConfigured')
+            ->andReturn(true);
+
+        $this->app->instance(GoogleDriveService::class, $mockService);
+
+        $user = User::firstOrCreate(
+            ['email' => 'mhs_drive_test@uis.ac.id'],
+            [
+                'name' => 'Mahasiswa Test Drive',
+                'password' => bcrypt('password'),
+                'role' => 'mahasiswa',
+            ]
+        );
+
+        $record = PrestasiMandiri::create([
+            'level' => 'Nasional',
+            'kategori' => 'Olahraga',
+            'nama_kompetisi' => 'Kompetisi Delete Test',
+            'nama_cabang' => 'Renang',
+            'peringkat' => 'Juara I',
+            'nama_penyelenggara' => 'PRSI',
+            'kepesertaan' => 'Individu',
+            'bentuk' => 'Luring',
+            'file_dokumen_sertifikat' => 'https://drive.google.com/file/d/file1/view',
+            'file_dokumen_lpj' => 'https://drive.google.com/file/d/file2/view',
+            'file_ktm' => 'https://drive.google.com/file/d/file3/view',
+            'file_pengajuan_reward' => 'https://drive.google.com/file/d/file4/view',
+            'file_surat_tugas' => 'https://drive.google.com/file/d/file5/view',
+            'data_mahasiswa' => [
+                ['nim' => '210101001', 'nama' => 'Mahasiswa Test Drive'],
+            ],
+            'pt' => 'Universitas Ibnu Sina',
+            'status' => 'Submitted',
+        ]);
+
+        $response = $this->actingAs($user)->delete(route('prestasi-mandiri.destroy', $record->id));
+        $response->assertRedirect(route('prestasi-mandiri.index'));
+
+        $this->assertNull(PrestasiMandiri::find($record->id));
+    }
 }

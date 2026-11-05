@@ -141,11 +141,13 @@ class GoogleDriveService
     }
 
     /**
-     * Extract File ID from Google Drive URL.
+     * Extract File ID from Google Drive URL or raw file ID.
      */
     public function extractFileId(?string $url): ?string
     {
         if (!$url) return null;
+
+        $url = trim($url);
 
         if (preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $url, $matches)) {
             return $matches[1];
@@ -155,19 +157,46 @@ class GoogleDriveService
             return $matches[1];
         }
 
+        // If raw alphanumeric ID (at least 20 chars without slashes)
+        if (preg_match('/^[a-zA-Z0-9_-]{20,}$/', $url)) {
+            return $url;
+        }
+
         return null;
     }
 
     /**
+     * Format file name following the convention: {nama_user}_{date}_{nama_file}
+     */
+    public function formatFileName(string $originalName, ?string $userName = null, ?string $date = null): string
+    {
+        $rawUser = $userName ?: (auth()->check() ? auth()->user()->name : 'user');
+        $cleanUser = trim(preg_replace('/[^A-Za-z0-9]/', '_', $rawUser), '_');
+        $cleanUser = preg_replace('/_+/', '_', $cleanUser);
+        if (empty($cleanUser)) {
+            $cleanUser = 'user';
+        }
+
+        $dateStr = $date ?: date('Y-m-d');
+
+        $cleanOriginal = preg_replace('/[^A-Za-z0-9\.\-_]/', '_', $originalName);
+        $cleanOriginal = trim(preg_replace('/_+/', '_', $cleanOriginal), '_');
+
+        return "{$cleanUser}_{$dateStr}_{$cleanOriginal}";
+    }
+
+    /**
      * Upload an uploaded file or file path into Google Drive folder.
+     * Naming format on Google Drive: {nama_user}_{date}_{nama_file}
      * Falls back to local public disk if Google Drive is not configured or fails.
      *
      * @param UploadedFile|string $file
      * @param string $folderConfigKeyOrId .env key (e.g. 'GOOGLE_DRIVE_UPLOAD_FILE_SERTIFIKAT') or folder URL / ID
      * @param string $localFallbackSubdir directory name for fallback in storage/app/public
+     * @param string|null $userName Owner name to prefix the file name
      * @return array{url: string, drive: bool, file_id: ?string, name: string}
      */
-    public function upload($file, string $folderConfigKeyOrId, string $localFallbackSubdir = 'uploads'): array
+    public function upload($file, string $folderConfigKeyOrId, string $localFallbackSubdir = 'uploads', ?string $userName = null): array
     {
         // 1. Resolve folder ID from .env or param
         $rawFolder = env($folderConfigKeyOrId, $folderConfigKeyOrId);
@@ -176,8 +205,9 @@ class GoogleDriveService
         $originalName = ($file instanceof UploadedFile)
             ? $file->getClientOriginalName()
             : basename($file);
-        $safeOriginal = preg_replace('/[^A-Za-z0-9\.\-_ ]/', '', $originalName);
-        $safeFilename = time() . '_' . $safeOriginal;
+
+        // Target naming format: {nama_user}_{date}_{nama_file}
+        $safeFilename = $this->formatFileName($originalName, $userName);
 
         // 2. Try Google Drive upload if configured
         if ($this->isConfigured() && $folderId) {
@@ -271,26 +301,69 @@ class GoogleDriveService
     /**
      * Delete file from Google Drive (or local storage).
      */
-    public function deleteFile(?string $urlOrPath): void
+    public function deleteFile(?string $urlOrPath): bool
     {
-        if (!$urlOrPath) return;
+        if (!$urlOrPath) return false;
 
-        // If Google Drive URL
-        if (str_contains($urlOrPath, 'drive.google.com')) {
+        // If Google Drive URL or ID
+        if (str_contains($urlOrPath, 'drive.google.com') || preg_match('/^[a-zA-Z0-9_-]{20,}$/', $urlOrPath)) {
             $fileId = $this->extractFileId($urlOrPath);
             if ($fileId && $this->isConfigured()) {
                 try {
                     $service = $this->getDrive();
                     $service->files->delete($fileId, ['supportsAllDrives' => true]);
+                    Log::info("Google Drive: Berhasil menghapus file ID {$fileId}");
+                    return true;
                 } catch (Throwable $e) {
                     Log::error("Google Drive delete file error: " . $e->getMessage());
+                    return false;
                 }
             }
         } else {
             // Local file
             if (Storage::disk('public')->exists($urlOrPath)) {
-                Storage::disk('public')->delete($urlOrPath);
+                return Storage::disk('public')->delete($urlOrPath);
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Rename an existing file on Google Drive to match new owner name.
+     */
+    public function renameExistingFile(string $urlOrPath, string $newOwnerName, string $fallbackLabel = 'dokumen'): bool
+    {
+        $fileId = $this->extractFileId($urlOrPath);
+        if (!$fileId || !$this->isConfigured()) {
+            return false;
+        }
+
+        try {
+            $service = $this->getDrive();
+            $file = $service->files->get($fileId, ['fields' => 'name', 'supportsAllDrives' => true]);
+            $currentName = $file->getName() ?: "{$fallbackLabel}.pdf";
+
+            $ext = pathinfo($currentName, PATHINFO_EXTENSION);
+            $ext = $ext ? ".{$ext}" : '';
+
+            $cleanUser = trim(preg_replace('/[^A-Za-z0-9]/', '_', $newOwnerName), '_');
+            $cleanUser = preg_replace('/_+/', '_', $cleanUser);
+            if (empty($cleanUser)) {
+                $cleanUser = 'user';
+            }
+
+            $dateStr = date('Y-m-d');
+            $cleanBase = pathinfo($currentName, PATHINFO_FILENAME);
+            $newName = "{$cleanUser}_{$dateStr}_{$cleanBase}{$ext}";
+
+            $driveFile = new DriveFile(['name' => $newName]);
+            $service->files->update($fileId, $driveFile, ['supportsAllDrives' => true]);
+            Log::info("Google Drive: Berhasil mengubah nama file {$fileId} menjadi {$newName}");
+            return true;
+        } catch (Throwable $e) {
+            Log::error("Google Drive rename file error: " . $e->getMessage());
+            return false;
         }
     }
 
