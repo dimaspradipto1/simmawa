@@ -378,10 +378,13 @@ class GoogleDriveService
         }
 
         $content = file_get_contents($envPath);
-        if (preg_match("/^{$key}=.*/m", $content)) {
-            $content = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $content);
+        $pattern = "/^{$key}=.*/m";
+        $replacement = "{$key}={$value}";
+
+        if (preg_match($pattern, $content)) {
+            $content = preg_replace_callback($pattern, fn() => $replacement, $content);
         } else {
-            $content .= "\n{$key}={$value}";
+            $content .= "\n{$replacement}";
         }
 
         file_put_contents($envPath, $content);

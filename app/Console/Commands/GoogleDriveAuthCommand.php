@@ -16,6 +16,7 @@ class GoogleDriveAuthCommand extends Command
     protected $signature = 'drive:auth 
                             {--code= : Google OAuth authorization code}
                             {--check : Check live Google Drive connection and folder access}
+                            {--url : Display the Google OAuth authorization URL}
                             {--test-upload : Perform end-to-end upload & delete test to Google Drive}
                             {--sync-local : Sync all existing local prestasi mandiri files to Google Drive}';
 
@@ -33,6 +34,14 @@ class GoogleDriveAuthCommand extends Command
     {
         $clientId = env('GOOGLE_DRIVE_CLIENT_ID');
         $clientSecret = env('GOOGLE_DRIVE_CLIENT_SECRET');
+
+        if ($this->option('url')) {
+            $client = $driveService->getClient();
+            $authUrl = $client->createAuthUrl();
+            $this->info('URL Otorisasi Google Drive:');
+            $this->line($authUrl);
+            return Command::SUCCESS;
+        }
 
         if ($this->option('check')) {
             $this->info('===============================================================');
