@@ -22,6 +22,10 @@ class GoogleDriveService
      */
     public function isConfigured(): bool
     {
+        if (!class_exists(\Google\Client::class)) {
+            return false;
+        }
+
         $clientId = env('GOOGLE_DRIVE_CLIENT_ID');
         $clientSecret = env('GOOGLE_DRIVE_CLIENT_SECRET');
         $refreshToken = env('GOOGLE_DRIVE_REFRESH_TOKEN');
@@ -30,6 +34,36 @@ class GoogleDriveService
         $hasToken = (!empty($refreshToken) && $refreshToken !== 'xxx') || (!empty($accessToken) && $accessToken !== 'xxx');
 
         return !empty($clientId) && !empty($clientSecret) && $hasToken;
+    }
+
+    /**
+     * Resolve a relative or absolute local file path across known Laravel disks.
+     */
+    public function resolveLocalFilePath(string $path): ?string
+    {
+        if (file_exists($path) && is_file($path)) {
+            return $path;
+        }
+
+        $clean = ltrim($path, '/\\');
+
+        $candidates = [
+            Storage::disk('public')->path($path),
+            Storage::disk('public')->path($clean),
+            storage_path('app/public/' . $clean),
+            storage_path('app/' . $clean),
+            public_path('storage/' . $clean),
+            public_path($clean),
+            base_path($clean),
+        ];
+
+        foreach ($candidates as $cand) {
+            if (file_exists($cand) && is_file($cand)) {
+                return $cand;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -231,12 +265,18 @@ class GoogleDriveService
 
                 if ($file instanceof UploadedFile) {
                     $filePath = $file->getRealPath();
-                } elseif (file_exists($file)) {
-                    $filePath = $file;
-                } elseif (Storage::disk('public')->exists($file)) {
-                    $filePath = Storage::disk('public')->path($file);
                 } else {
-                    $filePath = $file;
+                    $filePath = $this->resolveLocalFilePath($file);
+                }
+
+                if (!$filePath || !file_exists($filePath)) {
+                    Log::warning("Google Drive: Berkas lokal tidak ditemukan: {$file}");
+                    return [
+                        'url'     => is_string($file) ? $file : '',
+                        'drive'   => false,
+                        'file_id' => null,
+                        'name'    => $safeFilename,
+                    ];
                 }
 
                 $content = File::get($filePath);
@@ -276,7 +316,12 @@ class GoogleDriveService
             $localPath = $file->storeAs($localFallbackSubdir, $safeFilename, 'public');
         } else {
             $localPath = $localFallbackSubdir . '/' . $safeFilename;
-            Storage::disk('public')->put($localPath, File::get($file));
+            $resolved = $this->resolveLocalFilePath($file);
+            if ($resolved && file_exists($resolved)) {
+                Storage::disk('public')->put($localPath, File::get($resolved));
+            } else {
+                $localPath = $file;
+            }
         }
 
         return [

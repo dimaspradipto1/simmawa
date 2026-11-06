@@ -32,6 +32,13 @@ class GoogleDriveAuthCommand extends Command
      */
     public function handle(GoogleDriveService $driveService): int
     {
+        if (!class_exists(\Google\Client::class)) {
+            $this->error('Error: Library Google API Client (google/apiclient) belum terpasang di vendor server.');
+            $this->line('Silakan jalankan perintah berikut di Terminal cPanel:');
+            $this->info('  composer install --no-dev');
+            return Command::FAILURE;
+        }
+
         $clientId = env('GOOGLE_DRIVE_CLIENT_ID');
         $clientSecret = env('GOOGLE_DRIVE_CLIENT_SECRET');
 
@@ -129,12 +136,21 @@ class GoogleDriveAuthCommand extends Command
         }
 
         if ($this->option('sync-local')) {
+            if (!$driveService->isConfigured()) {
+                $this->error('Error: Google Drive belum terkonfigurasi atau token tidak valid.');
+                $this->line('Jalankan: php artisan drive:auth --check untuk memeriksa konfigurasi.');
+                return Command::FAILURE;
+            }
+
             $this->info('Memulai sinkronisasi berkas lokal Prestasi Mandiri ke Google Drive...');
             $records = \App\Models\PrestasiMandiri::all();
             $count = 0;
 
             foreach ($records as $record) {
                 $updated = false;
+                $ownerName = !empty($record->data_mahasiswa[0]['nama']) 
+                    ? $record->data_mahasiswa[0]['nama'] 
+                    : 'admin';
 
                 $fileMap = [
                     'file_dokumen_sertifikat' => 'GOOGLE_DRIVE_UPLOAD_FILE_SERTIFIKAT',
@@ -150,7 +166,7 @@ class GoogleDriveAuthCommand extends Command
                     $val = $record->{$field};
                     if (!empty($val) && !str_starts_with($val, 'http')) {
                         $this->line("Mengunggah {$field}: {$val}...");
-                        $res = $driveService->upload($val, $envKey, dirname($val));
+                        $res = $driveService->upload($val, $envKey, dirname($val), $ownerName);
                         if ($res['drive']) {
                             $record->{$field} = $res['url'];
                             $updated = true;
