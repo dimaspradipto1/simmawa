@@ -142,6 +142,8 @@ class GoogleDriveAuthCommand extends Command
                     'file_ktm'                => 'GOOGLE_DRIVE_UPLOAD_KTM',
                     'file_pengajuan_reward'   => 'GOOGLE_DRIVE_UPLOAD_SURAT_PENGAJUAN_REWARD_PRESTASI',
                     'file_surat_tugas'        => 'GOOGLE_DRIVE_UPLOAD_SURAT_WRIII_ATAU_WDI',
+                    'file_foto_upp'           => 'GOOGLE_DRIVE_UPLOAD_FOTO_UPP',
+                    'link_foto_upp'           => 'GOOGLE_DRIVE_UPLOAD_FOTO_UPP',
                 ];
 
                 foreach ($fileMap as $field => $envKey) {

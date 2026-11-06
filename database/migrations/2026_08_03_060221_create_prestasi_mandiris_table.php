@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('file_dokumen_sertifikat')->nullable();
             $table->date('tanggal_sertifikat')->nullable();
             $table->string('link_foto_upp')->nullable();
+            $table->string('file_foto_upp')->nullable();
             $table->string('link_dokumen_undangan')->nullable();
             $table->string('link_dokumen_lpj')->nullable();
             $table->string('file_dokumen_lpj')->nullable();

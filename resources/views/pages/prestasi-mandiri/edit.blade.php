@@ -267,11 +267,27 @@
           </div>
 
           <div class="col-md-6">
-            <label for="link_foto_upp" class="form-label fw-medium">Link Foto UPP<span class="text-danger">*</span></label>
+            <label for="file_foto_upp" class="form-label fw-medium">Upload Foto UPP<span class="text-danger">*</span></label>
+            @php 
+              $existingFotoUpp = $prestasiMandiri->file_foto_upp ?? $prestasiMandiri->link_foto_upp;
+            @endphp
+            @if($existingFotoUpp)
+              @php $isDrive = str_contains($existingFotoUpp, 'drive.google.com'); @endphp
+              <div class="mb-1 d-flex align-items-center justify-content-between p-1 px-2 bg-light rounded border">
+                <span class="small text-truncate text-secondary" style="max-width: 250px;">
+                  <i class="bi {{ $isDrive ? 'bi-google text-success' : 'bi-image text-success' }} me-1"></i>
+                  {{ $isDrive ? 'Berkas Google Drive' : basename($existingFotoUpp) }}
+                </span>
+                <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'foto-upp']) }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" target="_blank">
+                  <i class="bi {{ $isDrive ? 'bi-box-arrow-up-right' : 'bi-download' }}"></i> {{ $isDrive ? 'Buka Drive' : 'Lihat Berkas' }}
+                </a>
+              </div>
+            @endif
             <div class="input-group">
-              <span class="input-group-text bg-light text-secondary"><i class="bi bi-link-45deg"></i></span>
-              <input type="url" class="form-control @error('link_foto_upp') is-invalid @enderror" id="link_foto_upp" name="link_foto_upp" value="{{ old('link_foto_upp', $prestasiMandiri->link_foto_upp) }}" placeholder="URL">
+              <span class="input-group-text bg-light text-secondary"><i class="bi bi-image"></i></span>
+              <input type="file" class="form-control @error('file_foto_upp') is-invalid @enderror" id="file_foto_upp" name="file_foto_upp" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
             </div>
+            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Format: .png, .jpg, .jpeg (Maks. 10 MB). Kosongkan jika tidak ingin mengganti.</small>
           </div>
 
           <div class="col-md-6">

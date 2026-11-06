@@ -166,23 +166,33 @@ class GoogleDriveService
     }
 
     /**
-     * Format file name following the convention: {nama_user}_{date}_{nama_file}
+     * Format file name following the convention: {tanggal}_{nama_login}_{nama_file}
+     * Contoh: 2026_11_06_admin_nama_file
      */
     public function formatFileName(string $originalName, ?string $userName = null, ?string $date = null): string
     {
+        // 1. Tanggal (YYYY_MM_DD)
+        $rawDate = $date ?: date('Y_m_d');
+        $dateStr = str_replace('-', '_', $rawDate);
+
+        // 2. Nama yang login submit
         $rawUser = $userName ?: (auth()->check() ? auth()->user()->name : 'user');
         $cleanUser = trim(preg_replace('/[^A-Za-z0-9]/', '_', $rawUser), '_');
-        $cleanUser = preg_replace('/_+/', '_', $cleanUser);
+        $cleanUser = strtolower(preg_replace('/_+/', '_', $cleanUser));
         if (empty($cleanUser)) {
             $cleanUser = 'user';
         }
 
-        $dateStr = $date ?: date('Y-m-d');
-
+        // 3. Nama file asli
         $cleanOriginal = preg_replace('/[^A-Za-z0-9\.\-_]/', '_', $originalName);
         $cleanOriginal = trim(preg_replace('/_+/', '_', $cleanOriginal), '_');
 
-        return "{$cleanUser}_{$dateStr}_{$cleanOriginal}";
+        // Bersihkan prefix tanggal atau user terdahulu jika ada agar tidak menumpuk
+        $cleanOriginal = preg_replace('/^(user|[a-zA-Z0-9_-]+?)_\d{4}[_-]\d{2}[_-]\d{2}_/i', '', $cleanOriginal);
+        $cleanOriginal = preg_replace('/^\d{4}[_-]\d{2}[_-]\d{2}_[a-zA-Z0-9_-]+?_/i', '', $cleanOriginal);
+        $cleanOriginal = trim($cleanOriginal, '_');
+
+        return "{$dateStr}_{$cleanUser}_{$cleanOriginal}";
     }
 
     /**
@@ -348,14 +358,18 @@ class GoogleDriveService
             $ext = $ext ? ".{$ext}" : '';
 
             $cleanUser = trim(preg_replace('/[^A-Za-z0-9]/', '_', $newOwnerName), '_');
-            $cleanUser = preg_replace('/_+/', '_', $cleanUser);
+            $cleanUser = strtolower(preg_replace('/_+/', '_', $cleanUser));
             if (empty($cleanUser)) {
                 $cleanUser = 'user';
             }
 
-            $dateStr = date('Y-m-d');
+            $dateStr = date('Y_m_d');
             $cleanBase = pathinfo($currentName, PATHINFO_FILENAME);
-            $newName = "{$cleanUser}_{$dateStr}_{$cleanBase}{$ext}";
+            $cleanBase = preg_replace('/^(user|[a-zA-Z0-9_-]+?)_\d{4}[_-]\d{2}[_-]\d{2}_/i', '', $cleanBase);
+            $cleanBase = preg_replace('/^\d{4}[_-]\d{2}[_-]\d{2}_[a-zA-Z0-9_-]+?_/i', '', $cleanBase);
+            $cleanBase = trim($cleanBase, '_');
+
+            $newName = "{$dateStr}_{$cleanUser}_{$cleanBase}{$ext}";
 
             $driveFile = new DriveFile(['name' => $newName]);
             $service->files->update($fileId, $driveFile, ['supportsAllDrives' => true]);

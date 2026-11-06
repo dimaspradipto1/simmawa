@@ -124,14 +124,20 @@
                     </div>
                 </div>
 
-                <!-- Link Foto UPP & Link Dokumen Undangan -->
+                <!-- Foto UPP & Link Dokumen Undangan -->
                 <div class="col-md-6">
-                    <label class="form-label small fw-bold text-dark mb-1">Link Foto UPP</label>
-                    <div class="p-2 rounded bg-light border-0 text-dark small text-break">
-                        @if($prestasiMandiri->link_foto_upp)
-                            <a href="{{ $prestasiMandiri->link_foto_upp }}" target="_blank" class="text-primary text-decoration-none">{{ $prestasiMandiri->link_foto_upp }}</a>
+                    <label class="form-label small fw-bold text-dark mb-1">Foto UPP</label>
+                    <div class="p-2 rounded bg-light border-0 text-dark small">
+                        @php 
+                            $fotoUpp = $prestasiMandiri->file_foto_upp ?? $prestasiMandiri->link_foto_upp;
+                        @endphp
+                        @if($fotoUpp)
+                            @php $isDrive = str_contains($fotoUpp, 'drive.google.com'); @endphp
+                            <a href="{{ route('prestasi-mandiri.download-file', [$prestasiMandiri->id, 'foto-upp']) }}" class="btn btn-sm btn-outline-success py-1 px-3 d-inline-flex align-items-center" target="_blank">
+                                <i class="bi {{ $isDrive ? 'bi-google' : 'bi-image' }} me-1"></i> {{ $isDrive ? 'Buka di Google Drive' : 'Lihat Foto UPP' }}
+                            </a>
                         @else
-                            -
+                            <span class="text-muted">-</span>
                         @endif
                     </div>
                 </div>

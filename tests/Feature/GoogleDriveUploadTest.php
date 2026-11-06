@@ -136,16 +136,19 @@ class GoogleDriveUploadTest extends TestCase
     public function test_google_drive_naming_format_is_user_date_filename()
     {
         $service = app(GoogleDriveService::class);
-        $res = $service->formatFileName('sertifikat_lomba.pdf', 'Budi Santoso', '2026-11-05');
+        $res = $service->formatFileName('nama_file.pdf', 'admin', '2026_11_06');
 
-        $this->assertEquals('Budi_Santoso_2026-11-05_sertifikat_lomba.pdf', $res);
+        $this->assertEquals('2026_11_06_admin_nama_file.pdf', $res);
+
+        $res2 = $service->formatFileName('sertifikat.pdf', 'Budi Santoso', '2026-11-06');
+        $this->assertEquals('2026_11_06_budi_santoso_sertifikat.pdf', $res2);
     }
 
     public function test_destroy_deletes_files_via_drive_service()
     {
         $mockService = \Mockery::mock(GoogleDriveService::class);
         $mockService->shouldReceive('deleteFile')
-            ->times(5)
+            ->times(6)
             ->andReturn(true);
         $mockService->shouldReceive('isConfigured')
             ->andReturn(true);
@@ -175,6 +178,7 @@ class GoogleDriveUploadTest extends TestCase
             'file_ktm' => 'https://drive.google.com/file/d/file3/view',
             'file_pengajuan_reward' => 'https://drive.google.com/file/d/file4/view',
             'file_surat_tugas' => 'https://drive.google.com/file/d/file5/view',
+            'file_foto_upp' => 'https://drive.google.com/file/d/file6/view',
             'data_mahasiswa' => [
                 ['nim' => '210101001', 'nama' => 'Mahasiswa Test Drive'],
             ],
@@ -186,5 +190,49 @@ class GoogleDriveUploadTest extends TestCase
         $response->assertRedirect(route('prestasi-mandiri.index'));
 
         $this->assertNull(PrestasiMandiri::find($record->id));
+    }
+
+    public function test_foto_upp_png_upload_and_download_redirect()
+    {
+        Storage::fake('public');
+
+        $user = User::firstOrCreate(
+            ['email' => 'mhs_drive_test@uis.ac.id'],
+            [
+                'name' => 'Mahasiswa Test Drive',
+                'password' => bcrypt('password'),
+                'role' => 'mahasiswa',
+            ]
+        );
+
+        $fakePng = UploadedFile::fake()->image('foto_upp.png', 800, 600);
+
+        $response = $this->actingAs($user)->post(route('prestasi-mandiri.store'), [
+            'level' => 'Nasional',
+            'kategori' => 'Olahraga',
+            'nama_kompetisi' => 'Pekan Olahraga Mahasiswa Foto',
+            'nama_cabang' => 'Karate',
+            'peringkat' => 'Juara I',
+            'nama_penyelenggara' => 'FORKI',
+            'kepesertaan' => 'Individu',
+            'bentuk' => 'Luring',
+            'file_foto_upp' => $fakePng,
+            'no_hp' => '081234567890',
+            'data_mahasiswa' => [
+                ['nim' => '210101001', 'nama' => 'Mahasiswa Test Drive'],
+            ],
+        ]);
+
+        $response->assertRedirect(route('prestasi-mandiri.index'));
+
+        $record = PrestasiMandiri::where('nama_kompetisi', 'Pekan Olahraga Mahasiswa Foto')->first();
+        $this->assertNotNull($record);
+        $this->assertNotEmpty($record->file_foto_upp ?? $record->link_foto_upp);
+
+        // Test download / view redirect
+        $dlResponse = $this->actingAs($user)->get(route('prestasi-mandiri.download-file', [$record->id, 'foto-upp']));
+        $this->assertTrue(in_array($dlResponse->status(), [200, 302]));
+
+        $record->delete();
     }
 }
