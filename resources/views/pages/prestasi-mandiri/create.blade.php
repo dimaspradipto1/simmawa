@@ -245,7 +245,7 @@
           </div>
 
           <div class="col-md-6">
-            <label for="file_foto_upp" class="form-label fw-medium">Upload Foto UPP<span class="text-danger">*</span></label>
+            <label for="file_foto_upp" class="form-label fw-medium">Upload Link Foto Upacara Penyerahan Penghargaan<span class="text-danger">*</span></label>
             <div class="input-group">
               <span class="input-group-text bg-light text-secondary"><i class="bi bi-image"></i></span>
               <input type="file" class="form-control @error('file_foto_upp') is-invalid @enderror" id="file_foto_upp" name="file_foto_upp" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
